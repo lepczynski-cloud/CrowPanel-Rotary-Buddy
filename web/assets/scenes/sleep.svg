@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Buddy A sleepy desktop friend">
+  <defs>
+    <radialGradient id="glass" cx="49%" cy="36%" r="80%"><stop stop-color="#102a39"/><stop offset=".62" stop-color="#060f1c"/><stop offset="1" stop-color="#030812"/></radialGradient>
+    <linearGradient id="face" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#123b4e"/><stop offset="1" stop-color="#0b1e30"/></linearGradient>
+    <filter id="iconshadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity=".65"/></filter>
+    <style>.caption{font-family:system-ui,Arial,sans-serif;font-size:14.5px;font-weight:800;fill:#f7fbff;text-anchor:middle;letter-spacing:.2px}.highlight{fill:#a9bcff}</style>
+  </defs>
+  <circle cx="120" cy="120" r="119" fill="url(#glass)" stroke="#264052" stroke-width="2"/>
+  <circle cx="120" cy="120" r="107" fill="none" stroke="#1b3c4e" stroke-width="1.6" stroke-dasharray="140 15 41 21"/>
+  <circle cx="120" cy="118" r="79" fill="#081b2a" stroke="#294d5d" stroke-width="2"/>
+  <circle cx="120" cy="117" r="75" fill="url(#face)"/>
+  <path d="M70 113 Q90 92 110 113" stroke="#61ffed" stroke-width="7" fill="none" stroke-linecap="round"/>
+ <path d="M133 113 Q153 92 173 113" stroke="#61ffed" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M109 154 Q120 161 131 154" stroke="#73f9e9" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <ellipse cx="66" cy="147" rx="13" ry="5" fill="#f991b8" opacity=".8"/><ellipse cx="177" cy="147" rx="13" ry="5" fill="#f991b8" opacity=".8"/>
+  <path d="M75 77 L121 11 L169 76 Z" fill="#b9afff"/><rect x="73" y="71" width="97" height="13" rx="7" fill="#eeefff"/><circle cx="121" cy="11" r="9" fill="#f9d582"/><text x="187" y="71" font-size="29" font-weight="700" fill="#a5bbff">Z</text><text x="205" y="50" font-size="19" font-weight="700" fill="#d3c5ff">z</text>
+  <path d="M144 177 L158 161 L165 178" fill="#18384c"/>
+  <rect x="31" y="170" width="178" height="43" rx="16" fill="#18384c" stroke="#a9bcff" stroke-width="2"/>
+  <text x="120" y="196" class="caption highlight">FIVE MORE MINS</text>
+  <circle cx="119" cy="225" r="3" fill="#27586a"/><circle cx="130" cy="225" r="4" fill="#67f7ed"/>
+  </svg>

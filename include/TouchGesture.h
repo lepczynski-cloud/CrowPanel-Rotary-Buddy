@@ -3,9 +3,10 @@
 #include <stdlib.h>
 
 // Hardware-independent touch classifier. Each contact can produce either one
-// swipe OR one tap, never both. A swipe fires as soon as motion is sufficient,
+// swipe OR one tap, never both. Horizontal swipes change screens,
+// a downward swipe pets Buddy, and an upward swipe is intentionally ignored. A swipe fires as soon as motion is sufficient,
 // so it still works if some CST816D revisions miss the lift-up interrupt.
-enum class GestureType : uint8_t { None, Tap, Next, Previous };
+enum class GestureType : uint8_t { None, Tap, SwipeLeft, SwipeRight, SwipeUp, PetDown };
 
 struct GestureResult {
     GestureType type = GestureType::None;
@@ -26,8 +27,10 @@ public:
 
     // CST816D IDs: 1 down, 2 up, 3 left, 4 right.
     static GestureType hardwareDirection(uint8_t id) {
-        if (id == 1 || id == 3) return GestureType::Next;
-        if (id == 2 || id == 4) return GestureType::Previous;
+        if (id == 1) return GestureType::PetDown;
+        if (id == 2) return GestureType::SwipeUp;
+        if (id == 3) return GestureType::SwipeLeft;
+        if (id == 4) return GestureType::SwipeRight;
         return GestureType::None;
     }
 
@@ -52,12 +55,20 @@ public:
             if (abs(dx) > tapSlopPx || abs(dy) > tapSlopPx) tooFarForTap_ = true;
             if (!firedSwipe_ && now - startMs_ <= 1100) {
                 if (abs(dx) >= minSwipePx && abs(dx) * 4 >= abs(dy) * 5)
-                    result.type = dx < 0 ? GestureType::Next : GestureType::Previous;
+                    result.type = dx < 0 ? GestureType::SwipeLeft : GestureType::SwipeRight;
                 else if (abs(dy) >= minSwipePx && abs(dy) * 4 >= abs(dx) * 5)
-                    result.type = dy < 0 ? GestureType::Previous : GestureType::Next;
-                else if (hardwareDirection(hardwareGesture) != GestureType::None &&
-                         abs(dx) + abs(dy) >= tapSlopPx)
-                    result.type = hardwareDirection(hardwareGesture);
+                    result.type = dy < 0 ? GestureType::SwipeUp : GestureType::PetDown;
+                else {
+                    // The controller's direction hint may be stale. Only accept
+                    // it if measured movement agrees with the hinted axis.
+                    const GestureType hinted = hardwareDirection(hardwareGesture);
+                    const int fallbackMin = (minSwipePx * 2) / 3;
+                    if ((hinted == GestureType::SwipeLeft && dx <= -fallbackMin && abs(dx) > abs(dy)) ||
+                        (hinted == GestureType::SwipeRight && dx >= fallbackMin && abs(dx) > abs(dy)) ||
+                        (hinted == GestureType::PetDown && dy >= fallbackMin && abs(dy) > abs(dx)) ||
+                        (hinted == GestureType::SwipeUp && dy <= -fallbackMin && abs(dy) > abs(dx)))
+                        result.type = hinted;
+                }
                 if (result.type != GestureType::None) {
                     firedSwipe_ = true;
                     tooFarForTap_ = true;

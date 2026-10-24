@@ -55,6 +55,7 @@ constexpr int TOUCH_TAP_SLOP_PX = 19;
 constexpr int TOUCH_SWIPE_MIN_PX = 43;
 constexpr unsigned long TOUCH_NAV_COOLDOWN_MS = 320;
 constexpr unsigned long SWITCH_DEBOUNCE_MS = 28;
+// Long-press switch is intentionally not page navigation: swipe only.
 constexpr unsigned long HOLD_SWITCH_PAGE_MS = 650;
 
 // Timeouts measured since the most recent user interaction.

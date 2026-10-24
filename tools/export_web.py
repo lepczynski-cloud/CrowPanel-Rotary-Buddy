@@ -18,7 +18,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parent.parent
 ENV = 'crowpanel-rotary'
-RELEASE_VERSION = '1.0.0'
+RELEASE_VERSION = '1.1.0'
 FLASH_SIZE = 16 * 1024 * 1024
 APP_OFFSET = 0x10000
 

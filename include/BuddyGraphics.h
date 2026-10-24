@@ -106,7 +106,7 @@ void pageDots(G &g, int page) {
 }
 
 template <typename G>
-void mediaGlyph(G &g, int id, int cx, int cy, uint16_t color) {
+void mediaGlyph(G &g, int id, int cx, int cy, uint16_t color, bool muted = false) {
     if (id == 0) { // previous
         g.fillRect(cx - 11, cy - 12, 4, 24, color);
         g.fillTriangle(cx - 6, cy, cx + 12, cy - 13, cx + 12, cy + 13, color);
@@ -117,11 +117,16 @@ void mediaGlyph(G &g, int id, int cx, int cy, uint16_t color) {
     } else if (id == 2) { // next
         g.fillRect(cx + 7, cy - 12, 4, 24, color);
         g.fillTriangle(cx + 6, cy, cx - 12, cy - 13, cx - 12, cy + 13, color);
-    } else { // mute: loudspeaker with slash
-        g.fillRect(cx - 15, cy - 5, 9, 10, color);
-        g.fillTriangle(cx - 9, cy - 5, cx + 2, cy - 13, cx + 2, cy + 13, color);
-        g.drawLine(cx + 7, cy - 10, cx + 18, cy + 10, ROSE);
-        g.drawLine(cx + 9, cy - 10, cx + 20, cy + 10, ROSE);
+    } else { // Speaker: waves while active, red slash while muted.
+        g.fillRect(cx - 16, cy - 6, 9, 12, color);
+        g.fillTriangle(cx - 9, cy - 6, cx + 1, cy - 13, cx + 1, cy + 13, color);
+        if (muted) {
+            g.drawLine(cx + 6, cy - 13, cx + 20, cy + 14, ROSE);
+            g.drawLine(cx + 8, cy - 13, cx + 22, cy + 14, ROSE);
+        } else {
+            arc(g, cx + 2, cy, 10, -62, 62, CYAN, 2);
+            arc(g, cx + 2, cy, 17, -60, 60, SKY, 2);
+        }
     }
 }
 
@@ -159,7 +164,7 @@ void drawVolumeRing(G &g, int percent, uint32_t now, bool vivid) {
 
 template <typename G>
 void media(G &g, uint32_t now, int volumePct, bool showVolume,
-           int feedbackKind, uint32_t feedbackElapsed, bool usbConnected) {
+           int feedbackKind, uint32_t feedbackElapsed, bool usbConnected, bool mutedLocally) {
     base(g, now);
     text(g, "R O T A R Y   B U D D Y", 120, 28, 1, MUTED);
     text(g, "MEDIA", 120, 51, 4, WHITE);
@@ -180,11 +185,11 @@ void media(G &g, uint32_t now, int volumePct, bool showVolume,
             const uint16_t fill = i == 1 ? CYAN : PANEL;
             g.fillCircle(locations[i][0], locations[i][1], radius, fill);
             g.drawCircle(locations[i][0], locations[i][1], radius, i == 1 ? SKY : DIM);
-            mediaGlyph(g, i, locations[i][0], locations[i][1], i == 1 ? BG : WHITE);
+            mediaGlyph(g, i, locations[i][0], locations[i][1], i == 1 ? BG : WHITE, mutedLocally);
         }
         text(g, "PREV", 47, 83, 1, MUTED);
         text(g, "NEXT", 193, 83, 1, MUTED);
-        text(g, "MUTE", 120, 208, 1, MUTED);
+        text(g, mutedLocally ? "MUTED" : "SOUND ON", 120, 208, 1, mutedLocally ? ROSE : SKY);
     }
     if (feedbackKind == 1 || feedbackKind == 2) {
         skipParticles(g, feedbackElapsed, feedbackKind == 1 ? -1 : 1);
@@ -206,7 +211,7 @@ void media(G &g, uint32_t now, int volumePct, bool showVolume,
 struct Face {
     int gazeX = 0;
     int gazeY = 0;
-    int eyeWidth = 32;
+    int eyeWidth = 29;
     int eyeHeight = 33;
     int eyebrow = 0; // -1 anger, +1 curiosity
     int mouth = 0;   // 0 tiny, 1 smile, 2 open, 3 pout, 4 laughing, 5 tongue
@@ -304,6 +309,25 @@ inline Face faceFor(Mood mood, uint32_t elapsed, uint32_t now) {
         case Mood::Noodle: f.mouth = 5; f.eyeHeight = 23; break;
         case Mood::Hypno: f.eyeStyle = 5; f.mouth = 1; break;
         case Mood::Magnet: f.eyeStyle = 3; f.mouth = 1; f.eyeColor = VIOLET; break;
+        case Mood::PetBliss: f.eyeStyle = 2; f.mouth = 4; f.blush = true; break;
+        case Mood::Purr: f.eyeStyle = 1; f.mouth = 1; f.blush = true; break;
+        case Mood::Nuzzle: f.eyeStyle = 2; f.mouth = 1; f.tilt = ix(wave(now, .018f) * 6); break;
+        case Mood::HeadTilt: f.eyebrow = 1; f.gazeX = 7; f.mouth = 1; f.tilt = 8; break;
+        case Mood::HappyDance: f.eyeStyle = 2; f.mouth = 4; f.tilt = ix(wave(now, .021f) * 9); break;
+        case Mood::Curious: f.eyebrow = 1; f.gazeX = 8; f.mouth = 2; break;
+        case Mood::Cap: case Mood::Beanie: case Mood::TopHat:
+        case Mood::WizardHat: case Mood::Crown: case Mood::PartyHat:
+            f.eyeStyle = 2; f.mouth = 1; break;
+        case Mood::Headphones: f.eyeStyle = 2; f.mouth = 4; f.tilt = ix(wave(now, .008f) * 5); break;
+        case Mood::SleepCap: f.eyeStyle = 1; f.mouth = 1; break;
+        case Mood::Sunglasses: f.mouth = 1; break;
+        case Mood::Whistle: f.eyeStyle = 2; f.mouth = 2; break;
+        case Mood::HelloWave: f.winkRight = elapsed % 750 < 300; f.mouth = 4; break;
+        case Mood::PeekScreen: f.winkLeft = true; f.gazeX = -7; f.mouth = 1; break;
+        case Mood::Bashful: f.eyeStyle = 2; f.mouth = 1; f.blush = true; break;
+        case Mood::Alien: f.eyeColor = GREEN; f.eyeWidth = 38; f.eyeHeight = 42; f.mouth = 2; break;
+        case Mood::SideShuffle: f.tilt = ix(wave(now, .022f) * 11); f.mouth = 1; break;
+        case Mood::Wifi: f.eyeColor = SKY; f.eyeStyle = 2; f.mouth = 1; break;
         case Mood::Wake: f.eyeStyle = elapsed < 350 ? 1 : 0; f.mouth = 1; f.eyeHeight = elapsed < 300 ? 9 : 33; break;
         case Mood::Sleep: f.eyeStyle = 1; f.mouth = 0; break;
         case Mood::Dream: f.eyeStyle = 1; f.mouth = 1; break;
@@ -347,22 +371,167 @@ void drawEye(G &g, int x, int y, const Face &f, bool left) {
     g.fillCircle(px + 8, py + 9, 2, SKY);
 }
 
+// Large, expressive mouths remain readable on the real 1.28-inch screen.
 template <typename G>
 void drawMouth(G &g, int x, int y, int type, uint16_t color) {
-    if (type == 0) { arc(g, x, y, 6, 22, 158, color, 3); return; }
-    if (type == 1) { arc(g, x, y - 6, 18, 15, 165, color, 4); return; }
-    if (type == 2) { g.fillEllipse(x, y + 2, 10, 15, INNER); g.drawEllipse(x, y + 2, 11, 16, color); return; }
-    if (type == 3) { arc(g, x, y + 18, 17, 197, 343, color, 3); return; }
-    if (type == 4) {
-        g.fillEllipse(x, y + 2, 21, 12, INNER);
-        arc(g, x, y - 6, 22, 5, 174, color, 4);
-        g.fillRoundRect(x - 12, y + 7, 24, 4, 2, color);
+    if (type == 0) { arc(g, x, y - 8, 18, 22, 158, color, 4); return; }
+    if (type == 1) { // warm, wide smile with corners
+        arc(g, x, y - 13, 27, 17, 163, color, 5);
+        g.fillCircle(x - 26, y - 5, 2, color);
+        g.fillCircle(x + 26, y - 5, 2, color);
+        return;
+    }
+    if (type == 2) {
+        g.fillEllipse(x, y + 2, 14, 18, 0x0108);
+        g.drawEllipse(x, y + 2, 15, 19, color);
+        g.fillEllipse(x - 2, y + 10, 5, 3, ROSE);
+        return;
+    }
+    if (type == 3) { arc(g, x, y + 14, 20, 195, 345, color, 4); return; }
+    if (type == 4) { // open laugh / visible tongue
+        g.fillEllipse(x, y + 1, 27, 15, 0x0108);
+        arc(g, x, y - 11, 28, 8, 171, color, 5);
+        g.fillRoundRect(x - 15, y + 8, 30, 6, 3, ROSE);
         return;
     }
     if (type == 5) {
-        arc(g, x, y - 6, 19, 6, 170, color, 3);
-        g.fillRoundRect(x - 9, y + 7, 18, 13, 6, ROSE);
+        arc(g, x, y - 11, 25, 9, 167, color, 5);
+        g.fillRoundRect(x - 11, y + 7, 22, 18, 8, ROSE);
         return;
+    }
+}
+
+// Accessories and props are intentionally 40-60px, not tiny status icons.
+// They overlap a portion of the face for a more playful character.
+template <typename G>
+void bigProp(G &g, Mood mood, uint32_t now) {
+    if (mood == Mood::Coffee || mood == Mood::Snack) {
+        const int y = 110 + ix(wave(now, .004f) * 3);
+        g.fillRoundRect(158, y, 39, 36, 7, GOLD);
+        g.fillRoundRect(162, y + 4, 31, 27, 5, 0x5A6B);
+        g.drawCircle(201, y + 16, 11, GOLD);
+        g.fillRect(155, y + 35, 48, 4, GOLD);
+        for (int i = 0; i < 3; ++i)
+            arc(g, 165 + i * 11, y - 12 + ix(wave(now, .004f, i) * 3), 9, 205, 340, SKY, 2);
+    } else if (mood == Mood::BugHunt || mood == Mood::Debug || mood == Mood::Curious) {
+        const int x = 170, y = 126 + ix(wave(now, .004f) * 4);
+        g.fillCircle(x, y, 22, 0x144F);
+        g.drawCircle(x, y, 22, GOLD);
+        g.drawCircle(x, y, 19, SKY);
+        g.drawLine(x + 15, y + 18, x + 36, y + 37, GOLD);
+        g.drawLine(x + 17, y + 17, x + 38, y + 36, GOLD);
+        spark(g, x - 8, y - 6, 5, WHITE);
+    } else if (mood == Mood::Wifi || mood == Mood::Ping) {
+        const int x = 167, y = 145;
+        g.fillCircle(x, y - 15, 37, 0x0990);
+        arc(g, x, y, 31, 215, 325, CYAN, 5);
+        arc(g, x, y, 21, 215, 325, SKY, 4);
+        arc(g, x, y, 11, 215, 325, WHITE, 3);
+        g.fillCircle(x, y, 5, GOLD);
+    } else if (mood == Mood::Idea) {
+        const int x = 173, y = 116;
+        g.fillCircle(x, y, 23, GOLD);
+        g.fillRect(x - 12, y + 20, 24, 10, GOLD);
+        g.fillRoundRect(x - 10, y + 29, 20, 7, 3, SKY);
+        spark(g, x - 24, y - 23, 7, SKY);
+    } else if (mood == Mood::Rocket || mood == Mood::Comet) {
+        const int y = 103 - ix(4 * wave(now, .006f));
+        g.fillTriangle(168, y - 13, 147, y + 33, 192, y + 28, WHITE);
+        g.fillCircle(168, y + 12, 8, SKY);
+        g.fillTriangle(147, y + 30, 140, y + 47, 158, y + 34, ROSE);
+        g.fillTriangle(184, y + 29, 194, y + 45, 178, y + 34, GOLD);
+        g.fillTriangle(161, y + 33, 177, y + 33, 169, y + 54, GOLD);
+    } else if (mood == Mood::PetBliss || mood == Mood::Purr || mood == Mood::Nuzzle) {
+        heart(g, 170 + ix(wave(now, .009f) * 7), 91 - ix((now % 900) / 130), 2, ROSE);
+        arc(g, 107, 87, 24, 190, 336, GOLD, 3);
+        arc(g, 120, 79, 24, 190, 336, SKY, 3);
+        spark(g, 58, 140, 7, ROSE);
+    }
+}
+
+template <typename G>
+void headwear(G &g, Mood mood, int x, int y, uint32_t now) {
+    // x is the moving head center, y is the crown of the head.
+    if (mood == Mood::Cap || mood == Mood::PeekScreen) {
+        g.fillRoundRect(x - 41, y - 10, 82, 23, 10, SKY);
+        g.fillRoundRect(x - 6, y + 9, 57, 9, 4, CYAN);
+        g.fillCircle(x - 18, y + 1, 4, GOLD);
+    } else if (mood == Mood::Beanie || mood == Mood::Coffee || mood == Mood::Bashful) {
+        g.fillRoundRect(x - 38, y - 17, 76, 31, 13, VIOLET);
+        g.fillRoundRect(x - 39, y + 6, 78, 10, 4, SKY);
+        g.fillCircle(x, y - 19, 9, ROSE);
+    } else if (mood == Mood::TopHat) {
+        g.fillRoundRect(x - 29, y - 30, 58, 47, 6, PANEL);
+        g.fillRoundRect(x - 30, y + 8, 60, 8, 1, VIOLET);
+        g.fillRoundRect(x - 49, y + 14, 98, 7, 3, CYAN);
+    } else if (mood == Mood::WizardHat || mood == Mood::PartyHat) {
+        g.fillTriangle(x, y - 52, x - 41, y + 19, x + 42, y + 19,
+                       mood == Mood::WizardHat ? VIOLET : ROSE);
+        g.fillRoundRect(x - 46, y + 13, 92, 9, 5, CYAN);
+        star(g, x - 5, y - 11, 8, GOLD);
+        if (mood == Mood::PartyHat) g.fillCircle(x, y - 54, 8, GOLD);
+    } else if (mood == Mood::Crown) {
+        g.fillTriangle(x - 42, y + 14, x - 39, y - 27, x - 16, y + 5, GOLD);
+        g.fillTriangle(x - 18, y + 14, x, y - 38, x + 19, y + 14, GOLD);
+        g.fillTriangle(x + 16, y + 5, x + 39, y - 27, x + 42, y + 14, GOLD);
+        g.fillRoundRect(x - 42, y + 10, 84, 11, 3, GOLD);
+        g.fillCircle(x, y + 15, 4, ROSE);
+    } else if (mood == Mood::SleepCap || mood == Mood::SleepTalk) {
+        g.fillTriangle(x - 39, y + 12, x + 4, y - 40, x + 44, y + 9, SKY);
+        g.fillRoundRect(x - 40, y + 8, 83, 9, 4, WHITE);
+        g.fillCircle(x + 4, y - 40, 8, GOLD);
+    } else if (mood == Mood::Headphones || mood == Mood::Disco || mood == Mood::Weekend) {
+        arc(g, x, y + 45, 65, 198, 342, CYAN, 5);
+        g.fillRoundRect(x - 69, y + 34, 17, 48, 7, VIOLET);
+        g.fillRoundRect(x + 52, y + 34, 17, 48, 7, VIOLET);
+        g.fillRoundRect(x - 65, y + 39, 10, 36, 4, SKY);
+        g.fillRoundRect(x + 55, y + 39, 10, 36, 4, SKY);
+    } else if (mood == Mood::Sunglasses) {
+        g.fillRoundRect(x - 55, y + 44, 48, 27, 9, 0x0108);
+        g.fillRoundRect(x + 7, y + 44, 48, 27, 9, 0x0108);
+        g.drawLine(x - 7, y + 52, x + 7, y + 52, GOLD);
+        g.drawLine(x - 47, y + 50, x - 22, y + 50, SKY);
+    }
+    (void)now;
+}
+
+// A two-line speech bubble, not a small floating status label. Split at spaces
+// without dynamic allocation, with at most 15 printable characters per line.
+inline void speechLines(const char *caption, char *first, char *second) {
+    constexpr int maxChars = 15;
+    first[0] = second[0] = '\0';
+    if (!caption) return;
+    const size_t length = strlen(caption);
+    if (length <= maxChars) {
+        snprintf(first, 19, "%s", caption);
+        return;
+    }
+    size_t cut = maxChars;
+    while (cut > 7 && caption[cut] != ' ') --cut;
+    if (cut <= 7) cut = maxChars;
+    size_t part = cut;
+    if (part > 18) part = 18;
+    memcpy(first, caption, part);
+    first[part] = '\0';
+    const char *rest = caption + cut;
+    while (*rest == ' ') ++rest;
+    snprintf(second, 19, "%s", rest);
+}
+
+template <typename G>
+void speechBubble(G &g, const char *caption, bool positive) {
+    if (!caption || !*caption) return;
+    char line1[19] = {}, line2[19] = {};
+    speechLines(caption, line1, line2);
+    // Speech tail points towards Buddy's mouth.
+    g.fillTriangle(143, 175, 159, 161, 163, 178, PANEL);
+    g.fillRoundRect(33, 171, 174, 42, 15, PANEL);
+    g.drawRoundRect(33, 171, 174, 42, 15, positive ? SKY : GOLD);
+    if (line2[0]) {
+        text(g, line1, 120, 182, 2, WHITE);
+        text(g, line2, 120, 201, 2, positive ? CYAN : GOLD);
+    } else {
+        text(g, line1, 120, 192, 2, positive ? CYAN : WHITE);
     }
 }
 
@@ -389,7 +558,7 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
                 g.drawLine(39 + i * 6, 159, 44 + i * 6, 151, ROSE);
                 g.drawLine(185 + i * 6, 151, 190 + i * 6, 159, ROSE);
             }
-            if (mood == Mood::Shy) text(g, "HI...", 120, 48, 2, SKY);
+            
             break;
         case Mood::Party:
         case Mood::Bounce:
@@ -406,9 +575,9 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
             g.drawCircle(201, 64, 11, SKY);
             if (mood == Mood::Idea) {
                 spark(g, 201, 62, 8, GOLD);
-                text(g, "NICE!", 120, 48, 2, GOLD);
+
             } else {
-                text(g, "COFFEE?", 120, 48, 2, SKY);
+
             }
             break;
         case Mood::Sing:
@@ -541,14 +710,9 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
             break;
         case Mood::BugHunt:
         case Mood::Debug:
-            g.drawCircle(202, 71, 10, GOLD);
-            g.drawLine(209, 78, 217, 86, GOLD);
-            break;
         case Mood::Coffee:
         case Mood::Snack:
-            g.drawRoundRect(191, 65, 19, 21, 3, GOLD);
-            g.drawCircle(214, 74, 5, SKY);
-            break;
+            break; // Bigger foreground props are drawn in bigProp().
         case Mood::Panic:
         case Mood::Rollback:
             for (int i = 0; i < 4; ++i)
@@ -585,10 +749,10 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
         case Mood::Confused: text(g, "?", 197, 55, 4, GOLD); break;
         case Mood::Surprise: text(g, "!", 202, 57, 4, GOLD); break;
         case Mood::Grumpy: spark(g, 34, 89, 5, ROSE); break;
-        case Mood::Mischief: text(g, "PSST!", 120, 48, 2, VIOLET); break;
-        case Mood::Peekaboo: text(g, "BOO!", 120, 48, 2, GOLD); break;
-        case Mood::Yawn: text(g, "YAWN", 120, 49, 2, SKY); break;
-        case Mood::Wake: text(g, "HELLO!", 120, 47, 2, CYAN); break;
+        case Mood::Mischief:
+        case Mood::Peekaboo:
+        case Mood::Yawn:
+        case Mood::Wake: break;
         default: break;
     }
 }
@@ -597,47 +761,61 @@ template <typename G>
 void buddy(G &g, uint32_t now, Mood mood, uint32_t elapsed, const char *quip,
            bool volumeVisible, int volumePct, bool usbConnected) {
     base(g, now);
-    // Ambient aurora loops and engraved faceplate create depth without images.
-    arc(g, 120, 120, 106, 210, 325, VIOLET, 2);
-    arc(g, 120, 120, 100, 18, 143, SKY, 2);
-    const bool sleeping = mood == Mood::Sleep || mood == Mood::Dream || mood == Mood::SleepTalk;
-    const float breathe = sleeping ? 1.5f * wave(now, .0018f) : 1.0f * wave(now, .002f);
-    g.fillCircle(120, 123, 90 + ix(breathe), EDGE);
-    g.fillCircle(120, 123, 83 + ix(breathe), INNER);
-    g.drawCircle(120, 123, 83 + ix(breathe), sleeping ? DIM : PANEL);
+    // Restrained premium UI with a small, animated character in a round glass.
+    arc(g, 120, 120, 105, 205, 324, VIOLET, 2);
+    arc(g, 120, 120, 103, 20, 146, SKY, 2);
+    const bool sleeping = mood == Mood::Sleep || mood == Mood::Dream ||
+                          mood == Mood::SleepTalk || mood == Mood::SleepCap;
+    const bool petting = mood == Mood::PetBliss || mood == Mood::Purr ||
+                         mood == Mood::Nuzzle;
+    const int bobX = ix(wave(now, .0015f, .4f) * 7) + ix(wave(now, .003f) * 2);
+    const int bobY = ix(wave(now, sleeping ? .0016f : .0024f) * 4);
+    const int cx = 120 + bobX;
+    const int cy = 120 + bobY;
+    g.fillCircle(cx, cy, 79, EDGE);
+    g.fillCircle(cx, cy, 75, INNER);
+    g.drawCircle(cx, cy, 75, sleeping ? DIM : PANEL);
+
+    Face f = faceFor(mood, elapsed, now);
+    if (sleeping) f.eyeColor = SKY;
+    const int eyeL = cx - 30;
+    const int eyeR = cx + 30;
+    drawEye(g, eyeL, cy - 5 + f.tilt, f, true);
+    drawEye(g, eyeR, cy - 5 - f.tilt, f, false);
+    drawMouth(g, cx, cy + 32, f.mouth, f.eyeColor);
+    if (f.eyebrow != 0) {
+        const int sign = f.eyebrow;
+        g.drawLine(cx - 49, cy - 40 - sign * 5, cx - 20, cy - 37 + sign * 5, f.eyeColor);
+        g.drawLine(cx + 20, cy - 37 + sign * 5, cx + 49, cy - 40 - sign * 5, f.eyeColor);
+    }
+    if (f.blush || f.cheeks || petting) {
+        g.fillEllipse(cx - 54, cy + 23, 13, 6, ROSE);
+        g.fillEllipse(cx + 54, cy + 23, 13, 6, ROSE);
+    }
+
+    headwear(g, mood, cx, cy - 64, now);
+    buddyExtras(g, mood, elapsed, now);
+    bigProp(g, mood, now);
+
+    // A pet response is intentionally cheerful and visibly distinct.
+    if (petting) {
+        for (int i = 0; i < 3; ++i) {
+            const int drift = ix((elapsed * (i + 2) / 50) % 18);
+            spark(g, 59 + i * 19, 101 - drift, 3 + i, i % 2 ? GOLD : CYAN);
+        }
+    }
+
     if (volumeVisible) {
         drawVolumeRing(g, volumePct, now, true);
         char label[16]; snprintf(label, sizeof(label), "%d%%", volumePct);
-        g.fillRoundRect(78, 187, 84, 24, 12, PANEL);
-        text(g, label, 120, 199, 2, WHITE);
-        text(g, "EST.", 120, 215, 1, MUTED);
+        g.fillRoundRect(79, 181, 82, 31, 14, PANEL);
+        text(g, label, 120, 196, 2, WHITE);
+    } else if (quip && *quip) {
+        speechBubble(g, quip, petting || mood == Mood::HelloWave || mood == Mood::Happy);
+    } else {
+        text(g, sleeping ? "SLEEP MODE" : "SWIPE  /  PET", 120, 207, 1, MUTED);
     }
-    Face f = faceFor(mood, elapsed, now);
-    if (sleeping) f.eyeColor = SKY;
-    const int tilt = f.tilt;
-    // A subtle floating head motion without expensive bitmap scaling.
-    const int bob = ix(wave(now, .0015f, .9f) * 2.0f);
-    drawEye(g, 79, 119 + tilt + bob, f, true);
-    drawEye(g, 161, 119 - tilt + bob, f, false);
-    drawMouth(g, 120, 163 + bob, f.mouth, f.eyeColor);
-    if (f.eyebrow != 0) {
-        const int sign = f.eyebrow;
-        g.drawLine(60, 83 - sign * 5, 95, 86 + sign * 5, f.eyeColor);
-        g.drawLine(145, 86 + sign * 5, 180, 83 - sign * 5, f.eyeColor);
-    }
-    buddyExtras(g, mood, elapsed, now);
-    // Show a short joke without covering the interactive face or the volume ring.
-    // The 240px circular screen has less than 190px of usable width at y=47.
-    if (quip && *quip && !volumeVisible) {
-        const size_t count = strlen(quip);
-        const int font = count > 14 ? 1 : 2;
-        g.fillRoundRect(36, 35, 168, 26, 11, BG);
-        text(g, quip, 120, 48, font, (mood == Mood::Deploy || mood == Mood::Build) ? GREEN : GOLD);
-    }
-    if (!volumeVisible) {
-        text(g, sleeping ? "DREAM MODE" : "TAP TO PLAY", 120, 210, 1, MUTED);
-    }
-    g.fillCircle(200, 196, 3, usbConnected ? GREEN : ROSE);
+    g.fillCircle(202, 194, 3, usbConnected ? GREEN : ROSE);
     pageDots(g, 1);
 }
 

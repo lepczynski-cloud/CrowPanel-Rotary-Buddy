@@ -56,6 +56,7 @@ static uint32_t feedbackAt = 0;
 static uint32_t pageChangedAt = 0;
 static uint32_t lastDisconnectedCheckAt = 0;
 static int queueVolume = 0;
+static bool mutedLocally = false; // USB HID has no way to read host mute state
 static uint8_t feedbackKind = 0; // 1 prev, 2 next, 3 play/pause, 4 mute
 static uint8_t brightness = Config::DEFAULT_BRIGHTNESS;
 
@@ -190,7 +191,11 @@ static void runMediaButton(MediaButton button, uint32_t now) {
         default: return;
     }
     markActivity(now);
-    if (!mediaKey(usage)) feedbackKind = 0;
+    if (mediaKey(usage)) {
+        if (button == MediaButton::Mute) mutedLocally = !mutedLocally;
+    } else {
+        feedbackKind = 0;
+    }
     feedbackAt = now;
 }
 
@@ -214,7 +219,8 @@ static void handleSwitch(uint32_t now) {
     if (switchStable && !longPressHandled &&
         (now - switchPressedAt >= Config::HOLD_SWITCH_PAGE_MS)) {
         longPressHandled = true;
-        navigate(now, true);
+        // A long hold does nothing. Page changes are swipe-only.
+        // The release must not send Play/Pause after a long hold.
     }
 }
 
@@ -237,9 +243,12 @@ static void handleTouch(uint32_t now) {
         Config::TOUCH_MIN_TAP_MS, Config::TOUCH_MAX_TAP_MS,
         Config::TOUCH_TAP_SLOP_PX, Config::TOUCH_SWIPE_MIN_PX);
 
-    if (event.type == GestureType::Next || event.type == GestureType::Previous) {
-        // One swipe triggers exactly one navigation. A swipe is NEVER a tap.
+    if (event.type == GestureType::SwipeLeft || event.type == GestureType::SwipeRight) {
+        // Only horizontal swipes change pages, never a tap or a vertical gesture.
         navigate(now, true);
+    } else if (event.type == GestureType::PetDown) {
+        if (screen == Screen::Buddy) buddy.pet(now);
+        lastUserActionAt = now; // No multimedia command is sent for petting.
     } else if (event.type == GestureType::Tap && now - lastTapAt >= 110) {
         lastTapAt = now;
         if (screen == Screen::Buddy) {
@@ -273,14 +282,14 @@ static void drawFrame(uint32_t now) {
         if (framebufferReady) {
             framebuffer.startWrite();
             Art::media(framebuffer, now, volumeIndicator.displayed(), showVolume,
-                       kind, since, usbConnected);
+                       kind, since, usbConnected, mutedLocally);
             Art::transition(framebuffer, now - pageChangedAt, Config::TRANSITION_MS, false);
             framebuffer.endWrite();
             framebuffer.pushSprite(0, 0);
         } else {
             display.startWrite();
             Art::media(display, now, volumeIndicator.displayed(), showVolume,
-                       kind, since, usbConnected);
+                       kind, since, usbConnected, mutedLocally);
             Art::transition(display, now - pageChangedAt, Config::TRANSITION_MS, false);
             display.endWrite();
         }

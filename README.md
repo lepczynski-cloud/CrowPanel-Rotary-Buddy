@@ -18,7 +18,7 @@ The ESP32-S3 behaves as a standard **USB HID consumer-media controller**. It sup
 
 | MEDIA | BUDDY |
 | --- | --- |
-| Large **Previous**, **Play/Pause**, **Next** and **Mute** touch targets. Animated track-skip sparks, glowing rings and an animated 0–100% volume estimate. | **85 animated expression and effect states**, **72 rotating English captions**, responsive boops, blinking, laughter, rain, fireworks, coding jokes, dreams and a gentle sleep cycle. |
+| Large **Previous**, **Play/Pause**, **Next** and **Mute** touch targets. Animated track-skip sparks, glowing rings and an animated 0–100% volume estimate. | **107 animated expression and effect states**, **108 rotating English captions**, responsive boops, blinking, laughter, rain, fireworks, coding jokes, dreams and a gentle sleep cycle. |
 
 **Controls**
 
@@ -26,21 +26,23 @@ The ESP32-S3 behaves as a standard **USB HID consumer-media controller**. It sup
 | --- | --- |
 | Rotate the dial on either screen | Volume up/down (configurable sensitivity). |
 | Short press the knob | Play/Pause. |
-| Long press the knob, about 0.65 s | Switch between MEDIA and BUDDY. |
-| Swipe left, right, up or down | Switch between the two screens without triggering a media tap. |
-| Tap a media button | Previous, Play/Pause, Next or Mute. |
+| Long press the knob, about 0.65 s | No action, to prevent accidental play/pause. |
+| Swipe left or right | Switch between MEDIA and BUDDY. Only horizontal swipes navigate.
+| Stroke down on Buddy | Pet Buddy: hearts, big smiles, affectionate reactions and speech bubbles. No PC keys are sent.
+| Swipe up | Ignored to prevent accidental commands. |
+| Tap a media button | Previous, Play/Pause, Next or Mute. The speaker icon displays sound waves or a muted slash. |
 | Tap Buddy | Trigger a randomly selected expression or joke. |
 | Leave MEDIA idle for 30 seconds | Automatically enter BUDDY mode. |
 | Leave the device idle for 5 minutes | Buddy falls asleep and occasionally dreams or sleep-talks. |
 | Tap, turn or press while Buddy sleeps | Wake it up. |
 
-Buddy prefers gentle, infrequent movements, with louder reactions occurring less often. Sample jokes include `LET'S GO PROD!`, `WORKS ON MINE!`, `CI SAYS YES!`, `BUG? FEATURE!`, `IS IT DNS?`, `COFFEE FIRST`, `FRIDAY DEPLOY?` and `ROLLBACK?`.
+Buddy prefers gentle, infrequent movements, with louder reactions occurring less often. The face is slightly smaller so it can float and tilt. Speech appears in large, two-line comic-style bubbles; oversized coffee cups, Wi-Fi waves, search icons and hats can partially cover the face. Sample jokes include `LET'S GO PROD!`, `WORKS ON MINE!`, `CI SAYS YES!`, `BUG? FEATURE!`, `IS IT DNS?`, `COFFEE FIRST`, `FRIDAY DEPLOY?` and `ROLLBACK?`.
 
 **These captions are visual jokes only.** They never open apps, run commands or deploy software to production.
 
-All graphics are hand-coded C++ primitives rendered directly on the 240 × 240 round display. No GIFs, cloud API, microphone, remote server or animation downloads are involved. The website's metallic product render is an original illustration, not a photograph of a finished unit.
+Firmware graphics are hand-coded C++ primitives rendered directly on the 240 × 240 round display. The website includes eight original SVG illustrations matching the Buddy style. No GIFs, cloud API, microphone, remote server or animation downloads are involved. The website's metallic product render is an original illustration, not a photograph of a finished unit.
 
-**Important limitation:** standard USB HID can send volume commands but cannot read the actual system volume. The displayed 0–100% gauge is a local *estimate*, starting at a configurable value. Volume changes made directly on the computer will not be reflected automatically. The device does not receive song titles or playback status either.
+**Important limitations:** standard USB HID can send volume commands but cannot read the actual system volume. The displayed 0–100% gauge is a local *estimate*, starting at a configurable value. Volume changes made directly on the computer will not be reflected automatically. The device does not receive song titles or playback status either. Similarly, its mute/unmute icon tracks only the last toggle sent **from the dial**, so muting directly on the computer may cause the icon to differ from the host state.
 
 ## Install firmware from your browser
 
@@ -91,11 +93,11 @@ Create or open a **Cloudflare Pages project connected to this GitHub repository*
 
 If your existing Pages project currently uses `exit 0` as its build command, **replace that with `bash scripts/build_pages.sh`** in **Workers & Pages → your project → Settings → Builds**. Keep the output folder `web`. Leave automatic production deployments enabled and confirm the repository is connected to the correct `main` branch.
 
-After this one-time setup, simply push changes. Cloudflare downloads pinned build tools, compiles the application, creates the `.bin` files and manifests, and deploys everything together. The version shown on the installer includes the current Git commit's short hash, for example `1.0.0+gabcdef0` (the actual hash will vary).
+After this one-time setup, simply push changes. Cloudflare downloads pinned build tools, compiles the application, creates the `.bin` files and manifests, and deploys everything together. The version shown on the installer includes the current Git commit's short hash, for example `1.1.0+gabcdef0` (the actual hash will vary).
 
 Generated `web/firmware/` binaries are **intentionally gitignored**. They are produced during deployment and never need to be committed or copied by hand. When compilation, verification or any test fails, the Pages build exits nonzero and **the previous successful deployment remains available**. View failures under **Cloudflare Pages → Deployments → Build log**.
 
-The first build needs Internet access and sufficient build time to download PlatformIO, the Espressif toolchain and LovyanGFX. Cloudflare Pages builds have a 20-minute timeout, so if downloads exceed that limit, inspect the build log. Cloudflare setup and the first online firmware flash have not been performed automatically by these source files.
+The first build needs Internet access and sufficient build time to download PlatformIO, the Espressif toolchain and LovyanGFX. Cloudflare Pages builds have a 20-minute timeout, so if downloads exceed that limit, inspect the build log. Hardware flashing and your Cloudflare account are outside this source repository; check the deployment logs for any compiler errors.
 
 ### What the build generates automatically
 
@@ -137,7 +139,7 @@ Edit `include/Config.h`. The defaults include:
 | `TOUCH_SWIPE_MIN_PX` | `43` | Swipe distance threshold. |
 | `USE_FRAMEBUFFER` | `true` | Smooth sprite drawing, with direct-render fallback. |
 
-`include/BuddyBrain.h` contains the animation scheduler and 72 short English jokes. `include/BuddyGraphics.h` defines the round display artwork and effects. Both files are ordinary C++, so adding your own mood requires no third-party graphics tool.
+`include/BuddyBrain.h` contains the animation scheduler and 108 short English jokes. `include/BuddyGraphics.h` defines the animated speech bubbles, moving face, outfits, large icons, and display effects. Both files are ordinary C++, so adding your own mood requires no third-party graphics tool.
 
 ## Repository structure
 
@@ -179,12 +181,12 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 node --check web/assets/site.js
 ```
 
-Host tests exercise media touch areas, gestures, volume scaling, sleep/wake, all **85 renderable moods**, caption limits, random reactions, build-version consistency, safe flash offsets and checksum verification. They are not a substitute for full firmware compilation and a physical test on the target CrowPanel device. The actual hardware and Cloudflare Pages deployment must still be verified after the first online build.
+Host tests exercise media touch areas, gestures, volume scaling, sleep/wake, all **107 renderable moods**, caption limits, random reactions, build-version consistency, safe flash offsets and checksum verification. They are not a substitute for full firmware compilation and a physical test on the target CrowPanel device. The actual hardware and Cloudflare Pages deployment must still be verified after the first online build.
 
 ## GitHub repository metadata
 
 **Repository:** `CrowPanel-Rotary-Buddy`  
-**Suggested description:** `An animated ESP32-S3 desktop buddy and USB media dial with 85 moods, 72 witty reactions and one-click browser flashing. Auto-built on Cloudflare Pages.`  
+**Suggested description:** `An animated ESP32-S3 desktop buddy and USB media dial with 107 moods, 108 witty reactions and one-click browser flashing. Auto-built on Cloudflare Pages.`  
 **Website:** `https://crowpanel-rotary-buddy.lepczynski.it/`
 
 **Topics:** `esp32-s3`, `crowpanel`, `elecrow`, `desktop-pet`, `desk-companion`, `usb-hid`, `media-controller`, `rotary-encoder`, `touchscreen`, `platformio`, `esp-web-tools`, `web-serial`, `cloudflare-pages`, `open-source`, `windows`, `macos`, `linux`

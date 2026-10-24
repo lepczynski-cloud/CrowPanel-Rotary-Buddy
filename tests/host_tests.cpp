@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstring>
 #include <cstdint>
 #include <iostream>
 #include <set>
@@ -10,8 +11,8 @@
 #include "VolumeScaler.h"
 
 int main() {
-    static_assert(BUDDY_MOOD_COUNT == 85, "Unexpected number of animation states");
-    static_assert(BUDDY_QUIP_COUNT == 72, "Unexpected number of joke captions");
+    static_assert(BUDDY_MOOD_COUNT == 107, "Unexpected number of animation states");
+    static_assert(BUDDY_QUIP_COUNT == 108, "Unexpected number of joke captions");
     assert(std::string(moodName(Mood::Neutral)) == "Neutral");
     assert(std::string(moodName(Mood::Dream)) == "Dream");
     assert(std::string(moodName(Mood::Count)) == "Unknown");
@@ -36,9 +37,25 @@ int main() {
         return gesture.consume(press, release, 0, x, y, now, 12, 500, 19, 43);
     };
     assert(consume(true, false, 191, 121, 1000).type == GestureType::None);
-    assert(consume(true, false, 130, 122, 1060).type == GestureType::Next);
+    assert(consume(true, false, 130, 122, 1060).type == GestureType::SwipeLeft);
     assert(consume(true, false, 63, 123, 1080).type == GestureType::None);
     assert(consume(false, true, 63, 123, 1140).type == GestureType::None);
+    // Downward stroking is distinct from navigation, and never sends a tap.
+    assert(consume(true, false, 119, 76, 1500).type == GestureType::None);
+    assert(consume(true, false, 116, 149, 1570).type == GestureType::PetDown);
+    assert(consume(false, true, 116, 149, 1600).type == GestureType::None);
+    // Upward movement has no host action and never navigates.
+    assert(consume(true, false, 120, 166, 1700).type == GestureType::None);
+    assert(consume(true, false, 120, 96, 1770).type == GestureType::SwipeUp);
+    assert(consume(false, true, 120, 96, 1810).type == GestureType::None);
+    // A vertical-looking hardware ID cannot turn a horizontal drag into petting.
+    assert(TouchGesture::hardwareDirection(1) == GestureType::PetDown);
+    assert(TouchGesture::hardwareDirection(3) == GestureType::SwipeLeft);
+    TouchGesture safety;
+    safety.consume(true, false, 1, 120, 120, 6000, 12, 500, 19, 43);
+    assert(safety.consume(true, false, 1, 160, 123, 6030, 12, 500, 19, 43).type == GestureType::None);
+    assert(safety.consume(true, false, 3, 66, 123, 6060, 12, 500, 19, 43).type == GestureType::SwipeLeft);
+
     assert(consume(true, false, 120, 121, 2000).type == GestureType::None);
     assert(consume(false, true, 121, 122, 2100).type == GestureType::Tap);
     assert(consume(true, false, 120, 121, 2400).type == GestureType::None);
@@ -105,8 +122,15 @@ int main() {
     assert(brain.mood() == Mood::Sleep);
     brain.activity(2600 + 302600, true);
     assert(!brain.sleeping() && brain.mood() == Mood::Wake);
+    brain.pet(2600 + 305000);
+    assert(!brain.sleeping());
+    assert(brain.quip() && std::strlen(brain.quip()) > 0);
+    assert(brain.mood() == Mood::PetBliss || brain.mood() == Mood::Purr ||
+           brain.mood() == Mood::Nuzzle || brain.mood() == Mood::Happy ||
+           brain.mood() == Mood::Blush || brain.mood() == Mood::Bashful);
 
-    // Deterministic random scheduler: all 85 moods defined, many reachable idle
+
+    // Deterministic random scheduler: all 107 moods defined, many reachable idle
     // reactions actually become reachable, no tight endless animation loop.
     BuddyBrain variety(0x45221923u);
     variety.begin(0);

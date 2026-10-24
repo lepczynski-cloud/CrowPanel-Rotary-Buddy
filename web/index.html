@@ -29,9 +29,9 @@
       <div class="hero-content">
         <p class="eyebrow"><span class="live-dot"></span> OPEN SOURCE · ESP32-S3 · USB HID</p>
         <h1>One dial.<br><span class="gradient">A little life.</span></h1>
-        <p class="intro">Meet Rotary Buddy. A premium-looking media controller when you need it, a playful animated companion when you don't. Built for the 1.28-inch Elecrow CrowPanel rotary touchscreen.</p>
+        <p class="intro">Meet Rotary Buddy. A refined media dial when you need it, a playful little friend when you don't. Built for the 1.28-inch Elecrow CrowPanel rotary touchscreen.</p>
         <div class="hero-actions"><a class="btn primary" href="#install">Install firmware <span>↗</span></a><a class="btn secondary" href="https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy">Explore the code</a></div>
-        <div class="keyfacts"><span>Two swipeable screens</span><span>85 animated moods</span><span>No desktop app</span></div>
+        <div class="keyfacts"><span>Two screens, swipe sideways</span><span>107 animated moods</span><span>No desktop app</span></div>
       </div>
       <div class="hero-visual">
         <div class="halo" aria-hidden="true"></div>
@@ -40,6 +40,10 @@
                src="./assets/rotary-buddy-device.webp"
                width="1040" height="1040" fetchpriority="high"
                alt="Illustration of the round CrowPanel rotary display: silver knurled dial, black circular touch screen and smiling cyan Buddy face.">
+          <div class="preview-buddy" id="previewBuddy" aria-hidden="true">
+            <img src="./assets/scenes/hello.svg" width="240" height="240"
+                 alt="Illustration of Buddy waving hello with a speech bubble on the round display.">
+          </div>
           <div class="preview-media" id="previewMedia" hidden aria-hidden="true">
             <div class="preview-media-header"><small>ROTARY BUDDY</small><strong>MEDIA</strong></div>
             <div class="preview-media-volume" aria-hidden="true"></div>
@@ -47,7 +51,7 @@
               <span class="media-prev">&#x23EE;</span>
               <span class="media-play">&#x23EF;</span>
               <span class="media-next">&#x23ED;</span>
-              <span class="media-mute">&#x1F507;</span>
+              <span class="media-mute">&#x1F50A;</span>
             </div>
             <span class="preview-media-footer" aria-hidden="true"><i></i><i></i></span>
           </div>
@@ -58,16 +62,29 @@
     </section>
     <section class="facts shell" aria-label="Project highlights"><span>240 × 240 IPS</span><span>Native USB media keys</span><span>Windows · macOS · Linux</span><span>MIT licensed</span></section>
     <section class="section shell" id="design">
-      <div class="section-head"><p class="eyebrow">TWO WORLDS</p><h2>Useful by day.<br>Expressive all the time.</h2><p>No tiny menus or unnecessary shortcuts. Swipe to change modes, turn the ring for volume and press for play/pause on either screen.</p></div>
+      <div class="section-head"><p class="eyebrow">TWO WORLDS</p><h2>Useful by day.<br>Expressive all the time.</h2><p>No tiny menus or unnecessary shortcuts. Swipe sideways to change screens. Stroke down to pet Buddy. Turn the dial for volume and press to play or pause.</p></div>
       <div class="features">
         <article class="feature"><span class="feature-number">01</span><div class="feature-icon">◉</div><h3>Premium media deck</h3><p>Big Previous, Play/Pause, Next and Mute buttons. Volume animates around the ring from 0 to 100% (estimated, not read from the PC). Skip tracks and watch the sparks fly.</p></article>
-        <article class="feature"><span class="feature-number">02</span><div class="feature-icon">◡</div><h3>Your desk buddy</h3><p>85 animated moods and 72 witty captions. From blinking and dancing to rain, confetti, quirky glitches, sleepy dreams and gentle surprises.</p></article>
+        <article class="feature"><span class="feature-number">02</span><div class="feature-icon">◡</div><h3>Your desk buddy</h3><p>107 animated moods and 108 witty captions. From warm greetings and petting reactions to hats, headphones, oversized props and sleepy dreams.</p></article>
         <article class="feature"><span class="feature-number">03</span><div class="feature-icon">☾</div><h3>Gently drifts to sleep</h3><p>Media automatically becomes Buddy after 30 seconds without input. Buddy settles down and dreams after five minutes. Tap, twist or press to wake it up.</p></article>
       </div>
     </section>
     <section class="section reactions shell" id="reactions">
-      <div><p class="eyebrow">A PERSONALITY, NOT A SLIDESHOW</p><h2>A different mood.<br>Whenever you look.</h2><p>A lightweight procedural animation engine creates original expressions directly on the ESP32-S3. Most idle moments are subtle. Larger reactions are deliberately less frequent, so it stays pleasant on your desk.</p><p>Tap Buddy to trigger a random reaction or a short joke. Expect lines like “LET'S GO PROD!”, “WORKS ON MINE!” and “COFFEE FIRST”. These are on-screen jokes, not computer commands. Everything runs offline.</p></div>
+      <div><p class="eyebrow">A PERSONALITY, NOT A SLIDESHOW</p><h2>More than eyes.<br>A little personality.</h2><p>A lightweight procedural animation engine creates original expressions directly on the ESP32-S3. Most idle moments are subtle. Larger reactions are deliberately less frequent, so it stays pleasant on your desk.</p><p>Pet Buddy with a downward swipe for an affectionate response, or tap for a surprise. Watch it wear hats, headphones or a crown and react to coffee, Wi-Fi and imaginary bugs. All captions are on-screen jokes, never computer commands.</p></div>
       <div class="reaction-grid" aria-label="Examples of animation moods"><span>✦ Sparkles</span><span>♡ Heart eyes</span><span>◡ Smile</span><span>✳ Party</span><span>☾ Dream</span><span>☄ Dizzy</span><span>◇ Surprise</span><span>◌ Bubbles</span><span>◠ Shy</span><span>♫ Singing</span><span>✧ Winking</span><span>⋆ Mischief</span><span>☕ Coffee break</span><span>✓ CI passed</span><span>⚡ Deploy jokes</span><span>✳ Confetti</span></div>
+    </section>
+    <section class="gallery-section shell" aria-labelledby="galleryTitle">
+      <div class="gallery-heading"><p class="eyebrow">MEET THE MOODS</p><h2 id="galleryTitle">Big expressions. Tiny screen.</h2><p>Clear speech bubbles, animated eyes, oversized props and fun outfits. These illustrations represent the firmware's visual style.</p></div>
+      <div class="mood-gallery" aria-label="Illustrations of Rotary Buddy reactions">
+        <article class="mood-card"><img src="./assets/scenes/hello.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with a curious hello, displaying HELLO THERE!"><h3>HELLO THERE!</h3><p>A curious hello</p></article>
+        <article class="mood-card"><img src="./assets/scenes/coffee.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with a much-needed break, displaying COFFEE FIRST"><h3>COFFEE FIRST</h3><p>A much-needed break</p></article>
+        <article class="mood-card"><img src="./assets/scenes/pet.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with stroke down to make buddy happy, displaying MORE PETS!"><h3>MORE PETS!</h3><p>Stroke down to make Buddy happy</p></article>
+        <article class="mood-card"><img src="./assets/scenes/headphones.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with sometimes buddy brings the beat, displaying DJ BUDDY!"><h3>DJ BUDDY!</h3><p>Sometimes Buddy brings the beat</p></article>
+        <article class="mood-card"><img src="./assets/scenes/dns.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with investigating another mystery, displaying IS IT DNS?"><h3>IS IT DNS?</h3><p>Investigating another mystery</p></article>
+        <article class="mood-card"><img src="./assets/scenes/crown.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with a little engineering humour, displaying LET&#x27;S GO PROD!"><h3>LET&#x27;S GO PROD!</h3><p>A little engineering humour</p></article>
+        <article class="mood-card"><img src="./assets/scenes/sleep.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with a sleepy desktop friend, displaying FIVE MORE MINS"><h3>FIVE MORE MINS</h3><p>A sleepy desktop friend</p></article>
+        <article class="mood-card"><img src="./assets/scenes/wifi.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with wireless drama, purely visual, displaying WI-FI AGAIN?"><h3>WI-FI AGAIN?</h3><p>Wireless drama, purely visual</p></article>
+      </div>
     </section>
     <section class="section shell" id="install">
       <div class="section-head"><p class="eyebrow">WEB FLASHER</p><h2>From browser<br>to desk companion.</h2><p>No Arduino IDE or desktop installer required. Connect the device and install the firmware directly in your browser. After each successful GitHub update, Cloudflare automatically builds and publishes the new firmware.</p></div>

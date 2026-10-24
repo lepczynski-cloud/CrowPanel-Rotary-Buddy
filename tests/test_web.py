@@ -69,7 +69,23 @@ class WebTests(unittest.TestCase):
         self.assertIn('id="previewMedia"', html)
         self.assertIn('rotary-buddy-device.webp', html)
         self.assertIn("document.getElementById('previewMedia').hidden", script)
-        self.assertNotIn('previewBuddy', script)
+        self.assertIn('previewBuddy', script)
+        self.assertIn('id="previewBuddy"', html)
+        self.assertIn("document.getElementById('previewBuddy').hidden", script)
+
+    def test_gallery_faces_are_valid_local_svg(self):
+        from xml.etree import ElementTree as ET
+        folder = ROOT / 'web/assets/scenes'
+        scenes = sorted(folder.glob('*.svg'))
+        self.assertEqual(len(scenes), 8)
+        html = (ROOT / 'web/index.html').read_text(encoding='utf-8')
+        for svg in scenes:
+            root = ET.fromstring(svg.read_text(encoding='utf-8'))
+            self.assertTrue(root.tag.endswith('svg'))
+            self.assertIn('viewBox', root.attrib)
+            self.assertIn('assets/scenes/' + svg.name, html)
+        self.assertIn('mood-gallery', html)
+        self.assertIn('SWIPE', html.upper())
 
     def test_exporter_fails_closed_on_missing_binary(self):
         with self.assertRaises(ValueError):
@@ -119,7 +135,7 @@ class WebTests(unittest.TestCase):
             self.assertTrue((output / 'SHA256SUMS.txt').is_file())
             self.assertEqual(len((output / 'SHA256SUMS.txt').read_text().splitlines()), 2)
             self.assertTrue(json.loads((output / 'manifest.json').read_text()))
-            self.assertEqual(verify(output), '1.0.0+gabc1234')
+            self.assertEqual(verify(output), '1.1.0+gabc1234')
             with (output / 'rotary-buddy.update.bin').open('ab') as stream:
                 stream.write(b'wrong')
             with self.assertRaisesRegex(ValueError, 'Checksums'):
@@ -141,7 +157,8 @@ class WebTests(unittest.TestCase):
     def test_site_describes_automatic_installer(self):
         html = (ROOT / 'web/index.html').read_text(encoding='utf-8')
         js = (ROOT / 'web/assets/site.js').read_text(encoding='utf-8')
-        self.assertIn('85 animated moods', html)
+        self.assertIn('107 animated moods', html)
+        self.assertIn('108 witty captions', html)
         self.assertIn('Cloudflare automatically builds', html)
         self.assertNotIn('not published yet', html + js)
         self.assertNotIn('EXPORT_WEB_WINDOWS.bat', html + js)

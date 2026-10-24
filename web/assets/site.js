@@ -44,6 +44,7 @@ for (const button of document.querySelectorAll('[data-preview]')) {
   button.addEventListener('click', () => {
     const mode = button.getAttribute('data-preview');
     document.getElementById('previewMedia').hidden = mode !== 'media';
+    document.getElementById('previewBuddy').hidden = mode !== 'buddy';
     document.getElementById('deviceProduct').alt = mode === 'buddy'
       ? 'Illustration of the round CrowPanel rotary display: silver knurled dial, black circular touch screen and smiling cyan Buddy face.'
       : 'Illustration of the round CrowPanel rotary display showing the media controls preview.';

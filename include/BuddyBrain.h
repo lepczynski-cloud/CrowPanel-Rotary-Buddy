@@ -18,6 +18,10 @@ enum class Mood : uint8_t {
     Glitch, Heartbeat, Loading, Deploy, Build, BugHunt, Coffee,
     Snack, Debug, HighFive, Panic, Weekend, Rollback, SleepTalk,
     Ping, Typing, Freeze, Zoomies, Noodle, Hypno, Magnet,
+    PetBliss, Purr, Nuzzle, HeadTilt, HappyDance, Curious,
+    Cap, Beanie, TopHat, WizardHat, Headphones, Crown, PartyHat,
+    SleepCap, Sunglasses, Whistle, HelloWave, PeekScreen, Bashful,
+    Alien, SideShuffle, Wifi,
     Count
 };
 
@@ -39,7 +43,11 @@ inline const char *moodName(Mood mood) {
         "Stretch", "Boop", "Glitch", "Heartbeat", "Loading", "Deploy",
         "Build", "Bug hunt", "Coffee", "Snack", "Debug", "High five",
         "Panic", "Weekend", "Rollback", "Sleep talk", "Ping", "Typing",
-        "Freeze", "Zoomies", "Noodle", "Hypno", "Magnet"
+        "Freeze", "Zoomies", "Noodle", "Hypno", "Magnet",
+        "Pet bliss", "Purr", "Nuzzle", "Head tilt", "Happy dance", "Curious",
+        "Cap", "Beanie", "Top hat", "Wizard hat", "Headphones", "Crown",
+        "Party hat", "Sleep cap", "Sunglasses", "Whistle", "Hello wave",
+        "Peek screen", "Bashful", "Alien", "Side shuffle", "Wi-Fi"
     };
     constexpr unsigned n = sizeof(names) / sizeof(names[0]);
     static_assert(n == BUDDY_MOOD_COUNT, "Mood descriptions must match the enum");
@@ -90,7 +98,25 @@ static constexpr BuddyQuip BUDDY_QUIPS[] = {
     {Mood::Zoomies, "ZOOM ZOOM!"}, {Mood::Hypno, "LOOK AT ME!"},
     {Mood::CloudFloat, "CLOUD WATCH"}, {Mood::Rainy, "RAIN AGAIN?"},
     {Mood::PixelRain, "PIXEL PARTY!"}, {Mood::Comet, "I AM SPEED"},
-    {Mood::Wiggle, "DANCE WITH ME"}, {Mood::SleepTalk, "Zzz... PROD"}
+    {Mood::Wiggle, "DANCE WITH ME"}, {Mood::SleepTalk, "Zzz... PROD"},
+    {Mood::HelloWave, "HEY, YOU!"}, {Mood::HelloWave, "HI, HUMAN!"},
+    {Mood::HelloWave, "GOOD TO SEE YOU"}, {Mood::HelloWave, "WHAT'S UP?"},
+    {Mood::Curious, "WHAT ARE YOU DOING?"}, {Mood::Curious, "BUSY TODAY?"},
+    {Mood::Curious, "GOT ANY PLANS?"}, {Mood::Curious, "CAN I HELP?"},
+    {Mood::PeekScreen, "I SEE YOU!"}, {Mood::PeekScreen, "PSST... HI!"},
+    {Mood::HeadTilt, "TELL ME MORE!"}, {Mood::HeadTilt, "HMM?"},
+    {Mood::Cap, "CAPTAIN BUDDY!"}, {Mood::Cap, "HAT CHECK!"},
+    {Mood::Beanie, "COZY MODE!"}, {Mood::TopHat, "VERY FANCY!"},
+    {Mood::WizardHat, "CASTING SMILES!"}, {Mood::Headphones, "GOT THE BEAT!"},
+    {Mood::Headphones, "DJ BUDDY!"}, {Mood::Crown, "YOUR MAJESTY!"},
+    {Mood::PartyHat, "PARTY TIME!"}, {Mood::SleepCap, "FIVE MORE MINS"},
+    {Mood::Sunglasses, "TOO COOL!"}, {Mood::Whistle, "WHISTLE WHILE..."},
+    {Mood::HappyDance, "DANCE BREAK!"}, {Mood::Bashful, "AW, SHUCKS!"},
+    {Mood::Alien, "HELLO, EARTHLING"}, {Mood::Wifi, "IS IT THE WI-FI?"},
+    {Mood::SideShuffle, "JUST VIBING!"}, {Mood::Nuzzle, "A LITTLE CUDDLE?"},
+    {Mood::PetBliss, "MORE PETS!"}, {Mood::Purr, "PURRR..."},
+    {Mood::Coffee, "BREWING IDEAS"}, {Mood::Coffee, "COFFEE.EXE"},
+    {Mood::Debug, "IT'S ALWAYS DNS"}, {Mood::Weekend, "NO MEETINGS!"}
 };
 
 constexpr unsigned BUDDY_QUIP_COUNT = sizeof(BUDDY_QUIPS) / sizeof(BUDDY_QUIPS[0]);
@@ -127,13 +153,31 @@ public:
                     Mood::Laser, Mood::Peekaboo, Mood::Idea, Mood::Bubbles,
                     Mood::Rainbow, Mood::Mischief, Mood::Victory, Mood::Disco,
                     Mood::Confetti, Mood::Rocket, Mood::Wave, Mood::Glitch,
-                    Mood::Fireworks, Mood::Zoomies, Mood::Wiggle, Mood::Boop
+                    Mood::Fireworks, Mood::Zoomies, Mood::Wiggle, Mood::Boop,
+                    Mood::Curious, Mood::HelloWave, Mood::HeadTilt, Mood::PetBliss,
+                    Mood::Crown, Mood::TopHat, Mood::Beanie, Mood::Headphones
                 };
                 constexpr uint32_t count = sizeof(reactions) / sizeof(reactions[0]);
                 const Mood next = reactions[random(count)];
                 play(next, now, 1500 + random(1200));
             }
         }
+    }
+
+    // Stroke down the touchscreen to pet Buddy. Never emits any host HID key.
+    void pet(uint32_t now) {
+        sleeping_ = false;
+        lastInteraction_ = now;
+        static constexpr Mood petMoods[] = {
+            Mood::PetBliss, Mood::Purr, Mood::Nuzzle,
+            Mood::Happy, Mood::Blush, Mood::Bashful
+        };
+        static constexpr const char *petLines[] = {
+            "THAT FEELS NICE!", "PURRR...", "THANK YOU!",
+            "PET ME AGAIN!", "BEST HUMAN!", "I LIKE YOU!"
+        };
+        const unsigned choice = random(sizeof(petMoods) / sizeof(petMoods[0]));
+        play(petMoods[choice], now, 2300 + random(800), petLines[choice]);
     }
 
     void update(uint32_t now, uint32_t sleepAfterMs) {
@@ -182,7 +226,13 @@ public:
                 Mood::BugHunt, Mood::Coffee, Mood::Snack, Mood::Debug,
                 Mood::HighFive, Mood::Panic, Mood::Weekend, Mood::Rollback,
                 Mood::Ping, Mood::Typing, Mood::Freeze, Mood::Zoomies,
-                Mood::Noodle, Mood::Hypno, Mood::Magnet
+                Mood::Noodle, Mood::Hypno, Mood::Magnet,
+                Mood::PetBliss, Mood::Purr, Mood::Nuzzle, Mood::HeadTilt,
+                Mood::HappyDance, Mood::Curious, Mood::Cap, Mood::Beanie,
+                Mood::TopHat, Mood::WizardHat, Mood::Headphones, Mood::Crown,
+                Mood::PartyHat, Mood::SleepCap, Mood::Sunglasses, Mood::Whistle,
+                Mood::HelloWave, Mood::PeekScreen, Mood::Bashful, Mood::Alien,
+                Mood::SideShuffle, Mood::Wifi
             };
             const uint32_t roll = random(100);
             if (roll < 70) {
