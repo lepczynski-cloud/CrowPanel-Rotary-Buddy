@@ -7,6 +7,18 @@
 [![PlatformIO](https://img.shields.io/badge/firmware-PlatformIO-orange)](platformio.ini)
 [![Browser installer](https://img.shields.io/badge/flash-from%20browser-7258ce)](https://crowpanel-rotary-buddy.lepczynski.it/)
 
+<p align="center">
+  <a href="https://crowpanel-rotary-buddy.lepczynski.it/"><img src="web/assets/readme-buddy.webp" alt="Buddy mode: the round rotary display with a smiling animated face, coffee icon and COFFEE FIRST speech bubble" width="48%"></a>
+  <a href="https://crowpanel-rotary-buddy.lepczynski.it/"><img src="web/assets/readme-media.webp" alt="Media mode: the round rotary display showing previous, play/pause, next, mute and a glowing volume ring" width="48%"></a>
+</p>
+<p align="center"><sub>Buddy mode and Media mode. Illustrative previews of the website design, not photographs of the physical screen.</sub></p>
+<p align="center">
+  <a href="https://crowpanel-rotary-buddy.lepczynski.it/"><strong>Install from browser</strong></a> ·
+  <a href="https://www.youtube.com/@WojciechLepczynski">YouTube</a> ·
+  <a href="https://lepczynski.it/">Blog</a> ·
+  <a href="https://github.com/lepczynski-cloud">More projects</a>
+</p>
+
 **Web installer:** https://crowpanel-rotary-buddy.lepczynski.it/  
 **Source:** https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy
 
@@ -14,7 +26,7 @@ Turn the knob to adjust volume, press it to play or pause, or use the round touc
 
 The ESP32-S3 behaves as a standard **USB HID consumer-media controller**. It supports Windows, macOS and Linux (subject to the media-player behavior of the host OS), so there is no need to detect or configure an operating system profile.
 
-## Two screens
+## Two screens, one rotary dial
 
 | MEDIA | BUDDY |
 | --- | --- |
@@ -27,8 +39,8 @@ The ESP32-S3 behaves as a standard **USB HID consumer-media controller**. It sup
 | Rotate the dial on either screen | Volume up/down (configurable sensitivity). |
 | Short press the knob | Play/Pause. |
 | Long press the knob, about 0.65 s | No action, to prevent accidental play/pause. |
-| Swipe left or right | Switch between MEDIA and BUDDY. Only horizontal swipes navigate.
-| Stroke down on Buddy | Pet Buddy: hearts, big smiles, affectionate reactions and speech bubbles. No PC keys are sent.
+| Swipe left or right | Switch between MEDIA and BUDDY. Only horizontal swipes navigate. |
+| Stroke down on Buddy | Pet Buddy: hearts, big smiles, affectionate reactions and speech bubbles. No PC keys are sent. |
 | Swipe up | Ignored to prevent accidental commands. |
 | Tap a media button | Previous, Play/Pause, Next or Mute. The speaker icon displays sound waves or a muted slash. |
 | Tap Buddy | Trigger a randomly selected expression or joke. |
@@ -39,6 +51,18 @@ The ESP32-S3 behaves as a standard **USB HID consumer-media controller**. It sup
 Buddy prefers gentle, infrequent movements, with louder reactions occurring less often. The face is slightly smaller so it can float and tilt. Speech appears in large, two-line comic-style bubbles; oversized coffee cups, Wi-Fi waves, search icons and hats can partially cover the face. Sample jokes include `LET'S GO PROD!`, `WORKS ON MINE!`, `CI SAYS YES!`, `BUG? FEATURE!`, `IS IT DNS?`, `COFFEE FIRST`, `FRIDAY DEPLOY?` and `ROLLBACK?`.
 
 **These captions are visual jokes only.** They never open apps, run commands or deploy software to production.
+
+### Meet Buddy's many moods
+
+Buddy can be curious, sleepy, excited or in need of coffee. These **eight original illustrations from the project website** show the larger icons, outfits and speech bubbles. The expressions are rendered procedurally on the actual 240 × 240 display.
+
+| Hello there! | Coffee first | DJ Buddy | Let's go prod! |
+| :---: | :---: | :---: | :---: |
+| <img src="web/assets/scenes/hello.svg" alt="Friendly Buddy face saying HELLO THERE!" width="185"> | <img src="web/assets/scenes/coffee.svg" alt="Buddy with a big coffee mug and COFFEE FIRST speech bubble" width="185"> | <img src="web/assets/scenes/headphones.svg" alt="Buddy wearing headphones and saying DJ BUDDY!" width="185"> | <img src="web/assets/scenes/crown.svg" alt="Buddy with a crown saying LET'S GO PROD!" width="185"> |
+| **More pets!** | **Is it DNS?** | **Wi-Fi again?** | **Five more mins** |
+| <img src="web/assets/scenes/pet.svg" alt="Happy Buddy reacting to a gentle pet with MORE PETS!" width="185"> | <img src="web/assets/scenes/dns.svg" alt="Buddy investigating with a magnifying glass, saying IS IT DNS?" width="185"> | <img src="web/assets/scenes/wifi.svg" alt="Buddy reacting to Wi-Fi with WI-FI AGAIN?" width="185"> | <img src="web/assets/scenes/sleep.svg" alt="Sleepy Buddy saying FIVE MORE MINS" width="185"> |
+
+*Illustrations are representative artwork, not literal screenshots or promised word-for-word renderings of every firmware animation.* Explore the [interactive Buddy/Media preview](https://crowpanel-rotary-buddy.lepczynski.it/) for a closer look.
 
 Firmware graphics are hand-coded C++ primitives rendered directly on the 240 × 240 round display. The website includes eight original SVG illustrations matching the Buddy style. No GIFs, cloud API, microphone, remote server or animation downloads are involved. The website's metallic product render is an original illustration, not a photograph of a finished unit.
 
@@ -156,7 +180,7 @@ CrowPanel-Rotary-Buddy/
 ├── tests/                       Host C++ tests and installer/release tests
 ├── web/
 │   ├── index.html               Browser installer and project website
-│   └── assets/                  Static design and illustration
+│   └── assets/                  Static design, illustrations and README previews
 ├── platformio.ini
 ├── partitions.csv
 ├── BUILD_WINDOWS.bat
@@ -190,6 +214,19 @@ Host tests exercise media touch areas, gestures, volume scaling, sleep/wake, all
 **Website:** `https://crowpanel-rotary-buddy.lepczynski.it/`
 
 **Topics:** `esp32-s3`, `crowpanel`, `elecrow`, `desktop-pet`, `desk-companion`, `usb-hid`, `media-controller`, `rotary-encoder`, `touchscreen`, `platformio`, `esp-web-tools`, `web-serial`, `cloudflare-pages`, `open-source`, `windows`, `macos`, `linux`
+
+## More projects from my workbench
+
+I share practical hardware builds, local-first tools and automation experiments on my [YouTube channel](https://www.youtube.com/@WojciechLepczynski) and [DevOps & Cloud blog](https://lepczynski.it/). If you enjoyed Rotary Buddy, you might also like:
+
+| Project | What it does | Try it | Source code |
+| --- | --- | --- | --- |
+| **M5Stack Touch Control Deck** | A compact touchscreen controller for PC actions and shortcuts. | [Web installer](https://m5stack-touch-control-deck.lepczynski.it/) | [GitHub](https://github.com/lepczynski-cloud/M5Stack-Touch-Control-Deck) |
+| **SB to HTML Converter** | Run Scratch projects as standalone HTML, right in the browser. | [Open app](https://sbtohtml.lepczynski.it/) | [GitHub](https://github.com/lepczynski-cloud/sb-to-html-converter) |
+| **ASCII Camera Studio** | Transform a camera feed, images or video into ASCII art. | [Open app](https://asciicamera.lepczynski.it/) | [GitHub](https://github.com/lepczynski-cloud/ascii-camera-studio) |
+| **Online Admin Toolkit** | Useful browser tools for networking, Linux and everyday admin tasks. | [Open tools](https://admintoolkit.lepczynski.it/) | [GitHub](https://github.com/lepczynski-cloud/admin-toolkit) |
+
+For more tutorials, projects and behind-the-scenes tests, visit **[lepczynski.it](https://lepczynski.it/)** or **[YouTube @WojciechLepczynski](https://www.youtube.com/@WojciechLepczynski)**.
 
 ## License and credits
 
