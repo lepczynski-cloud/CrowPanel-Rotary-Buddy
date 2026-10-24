@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from html.parser import HTMLParser
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -11,7 +12,8 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'tools'))
-from export_web import generate_manifest, APP_OFFSET, VERSION, valid_esp_image, export
+from export_web import generate_manifest, APP_OFFSET, RELEASE_VERSION, build_version, valid_esp_image, export
+from verify_release import verify
 
 
 class HTMLAudit(HTMLParser):
@@ -39,7 +41,7 @@ class WebTests(unittest.TestCase):
         self.assertEqual(factory['builds'][0]['parts'][0]['offset'], 0)
         self.assertEqual(update['builds'][0]['parts'][0]['offset'], 0x10000)
         self.assertTrue(update['new_install_prompt_erase'])
-        self.assertEqual(factory['version'], VERSION)
+        self.assertTrue(factory['version'].startswith(RELEASE_VERSION))
         self.assertTrue(json.loads(json.dumps(factory)))
 
     def test_static_web_installer(self):
@@ -106,8 +108,9 @@ class WebTests(unittest.TestCase):
                 Path(command[command.index('-o') + 1]).write_bytes(
                     b'\xe9' + bytes(1024 * 1024 - 1))
 
-            with patch('export_web.subprocess.run', side_effect=stub_merge):
-                release = export(root, sys.executable)
+            with patch.dict(os.environ, {'CF_PAGES_COMMIT_SHA': 'abc1234de00000112233'}):
+                with patch('export_web.subprocess.run', side_effect=stub_merge):
+                    release = export(root, sys.executable)
             output = root / 'web' / 'firmware'
             self.assertTrue((output / 'rotary-buddy.factory.bin').is_file())
             self.assertEqual((output / 'rotary-buddy.update.bin').read_bytes(), firmware.read_bytes())
@@ -116,6 +119,32 @@ class WebTests(unittest.TestCase):
             self.assertTrue((output / 'SHA256SUMS.txt').is_file())
             self.assertEqual(len((output / 'SHA256SUMS.txt').read_text().splitlines()), 2)
             self.assertTrue(json.loads((output / 'manifest.json').read_text()))
+            self.assertEqual(verify(output), '1.0.0+gabc1234')
+            with (output / 'rotary-buddy.update.bin').open('ab') as stream:
+                stream.write(b'wrong')
+            with self.assertRaisesRegex(ValueError, 'Checksums'):
+                verify(output)
+
+    def test_git_version_and_automatic_build_contract(self):
+        with patch.dict(os.environ, {'CF_PAGES_COMMIT_SHA': 'DEADBEEF001122'}):
+            self.assertEqual(build_version(), RELEASE_VERSION + '+gdeadbee')
+        runner = (ROOT / 'scripts/build_pages.sh').read_text(encoding='utf-8')
+        self.assertIn('set -Eeuo pipefail', runner)
+        self.assertIn('python -m platformio run -e crowpanel-rotary', runner)
+        self.assertIn('python tools/export_web.py', runner)
+        self.assertIn('python tools/verify_release.py web/firmware', runner)
+        self.assertIn('rm -rf web/firmware', runner)
+        ignore = (ROOT / '.gitignore').read_text(encoding='utf-8')
+        self.assertIn('web/firmware/', ignore)
+        self.assertIn('.build-venv/', ignore)
+
+    def test_site_describes_automatic_installer(self):
+        html = (ROOT / 'web/index.html').read_text(encoding='utf-8')
+        js = (ROOT / 'web/assets/site.js').read_text(encoding='utf-8')
+        self.assertIn('85 animated moods', html)
+        self.assertIn('Cloudflare automatically builds', html)
+        self.assertNotIn('not published yet', html + js)
+        self.assertNotIn('EXPORT_WEB_WINDOWS.bat', html + js)
 
     def test_partition_layout_consistency(self):
         partition = (ROOT / 'partitions.csv').read_text()

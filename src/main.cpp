@@ -16,7 +16,7 @@
 #include "BuddyBrain.h"
 #include "BuddyGraphics.h"
 
-// Rotary Buddy v0.3.0-beta: only two pages, standard USB media HID on every host.
+// Rotary Buddy: two pages, standard USB media HID on every host.
 // No host shortcuts, Wi-Fi, Bluetooth, native companion application, or audio.
 static USBHID hid;
 static USBHIDKeyboard keyboard;
@@ -60,7 +60,7 @@ static uint8_t feedbackKind = 0; // 1 prev, 2 next, 3 play/pause, 4 mute
 static uint8_t brightness = Config::DEFAULT_BRIGHTNESS;
 
 // Interrupt sampling ensures fast encoder edges are not lost while the 240x240
-// framebuffer is pushed over SPI. Quadrature polarity matches v0.2.2.
+// framebuffer is pushed over SPI. Signed quadrature polarity follows encoder wiring.
 static volatile uint8_t encoderPrevious = 0;
 static volatile int16_t encoderDelta = 0;
 static int encoderCarry = 0;
@@ -287,14 +287,14 @@ static void drawFrame(uint32_t now) {
     } else {
         if (framebufferReady) {
             framebuffer.startWrite();
-            Art::buddy(framebuffer, now, buddy.mood(), buddy.elapsed(now),
+            Art::buddy(framebuffer, now, buddy.mood(), buddy.elapsed(now), buddy.quip(),
                        showVolume, volumeIndicator.displayed(), usbConnected);
             Art::transition(framebuffer, now - pageChangedAt, Config::TRANSITION_MS, true);
             framebuffer.endWrite();
             framebuffer.pushSprite(0, 0);
         } else {
             display.startWrite();
-            Art::buddy(display, now, buddy.mood(), buddy.elapsed(now),
+            Art::buddy(display, now, buddy.mood(), buddy.elapsed(now), buddy.quip(),
                        showVolume, volumeIndicator.displayed(), usbConnected);
             Art::transition(display, now - pageChangedAt, Config::TRANSITION_MS, true);
             display.endWrite();
@@ -376,7 +376,7 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(Config::ENCODER_A), encoderInterrupt, CHANGE);
     attachInterrupt(digitalPinToInterrupt(Config::ENCODER_B), encoderInterrupt, CHANGE);
 
-    // IMPORTANT: identical I2C polling driver, orientation and pins as v0.2.2.
+    // Polling I2C touch driver, matching Elecrow CST816D wiring.
     touchReady = touch.begin();
     USB.manufacturerName("lepczynski-cloud");
     USB.productName("CrowPanel Rotary Buddy");

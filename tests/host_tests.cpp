@@ -10,7 +10,8 @@
 #include "VolumeScaler.h"
 
 int main() {
-    static_assert(BUDDY_MOOD_COUNT == 43, "Unexpected number of animation states");
+    static_assert(BUDDY_MOOD_COUNT == 85, "Unexpected number of animation states");
+    static_assert(BUDDY_QUIP_COUNT == 72, "Unexpected number of joke captions");
     assert(std::string(moodName(Mood::Neutral)) == "Neutral");
     assert(std::string(moodName(Mood::Dream)) == "Dream");
     assert(std::string(moodName(Mood::Count)) == "Unknown");
@@ -44,7 +45,7 @@ int main() {
     assert(consume(true, false, 141, 148, 2440).type == GestureType::None);
     assert(consume(false, true, 141, 148, 2510).type == GestureType::None);
 
-    // Same sensitivity as the working v0.2.2 implementation.
+    // Volume scaling remains half speed by default.
     VolumeScaler scaler(2);
     assert(scaler.apply(3) == 1);
     assert(scaler.apply(3) == 2);
@@ -105,7 +106,7 @@ int main() {
     brain.activity(2600 + 302600, true);
     assert(!brain.sleeping() && brain.mood() == Mood::Wake);
 
-    // Deterministic random scheduler: 43 moods available, multiple unique idle
+    // Deterministic random scheduler: all 85 moods defined, many reachable idle
     // reactions actually become reachable, no tight endless animation loop.
     BuddyBrain variety(0x45221923u);
     variety.begin(0);
@@ -114,7 +115,29 @@ int main() {
         variety.update(now, 2100000000u);
         ids.insert(static_cast<unsigned>(variety.mood()));
     }
-    assert(ids.size() >= 30);
+    assert(ids.size() >= 65);
+    // Boop reactions can display jokes and never call USB host actions.
+    BuddyBrain playful(0x5199u);
+    playful.begin(0);
+    unsigned captions = 0;
+    for (uint32_t i = 1; i < 2000; ++i) {
+        playful.activity(i * 100, true);
+        if (playful.quip()) ++captions;
+    }
+    assert(captions > 700);
+    // A sleeping buddy sometimes sleep-talks, and touch wakes it reliably.
+    BuddyBrain sleeper(0x913a);
+    sleeper.begin(0);
+    sleeper.update(301000, 300000);
+    assert(sleeper.sleeping());
+    bool heardSleepTalk = false;
+    for (uint32_t now = 304000; now < 1800000; now += 5000) {
+        sleeper.update(now, 300000);
+        if (sleeper.mood() == Mood::SleepTalk) heardSleepTalk = true;
+    }
+    assert(heardSleepTalk);
+    sleeper.activity(1800500, true);
+    assert(!sleeper.sleeping());
     std::cout << "PASS: gesture safety, encoder, media zones, volume estimate, sleep/wake, "
               << ids.size() << " sampled animation states\n";
 }

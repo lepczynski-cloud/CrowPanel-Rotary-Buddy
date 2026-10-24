@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-"""Create a browser-flashable factory image + safe application-only update.
+"""Package a PlatformIO build for the ESP Web Tools browser installer.
 
-Prerequisites: `pio run -e crowpanel-rotary` and `pip install esptool==4.8.1`.
-
-Note: the website cannot flash source code! Real binaries are deliberately NOT
-shipped until a successful PlatformIO build creates them. Never substitute an
-old v0.2.x application image into these manifests.
+Cloudflare Pages compiles firmware and runs this exporter on every Git push.
+There is no manually published binary or local export step.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -19,15 +18,30 @@ import sys
 
 ROOT = Path(__file__).resolve().parent.parent
 ENV = 'crowpanel-rotary'
-VERSION = '0.3.0-beta'
+RELEASE_VERSION = '1.0.0'
 FLASH_SIZE = 16 * 1024 * 1024
 APP_OFFSET = 0x10000
 
 
-def generate_manifest(image: str, offset: int) -> dict:
+def build_version(root: Path = ROOT) -> str:
+    sha = os.environ.get('CF_PAGES_COMMIT_SHA') or os.environ.get('GITHUB_SHA')
+    if not sha:
+        try:
+            result = subprocess.run(['git', 'rev-parse', '--short=7', 'HEAD'], cwd=root,
+                                    capture_output=True, text=True, check=False)
+            if result.returncode == 0:
+                sha = result.stdout.strip()
+        except OSError:
+            pass
+    if sha and re.fullmatch(r'[a-fA-F0-9]{7,40}', sha):
+        return RELEASE_VERSION + '+g' + sha[:7].lower()
+    return RELEASE_VERSION
+
+
+def generate_manifest(image: str, offset: int, version=None) -> dict:
     manifest = {
         'name': 'CrowPanel Rotary Buddy',
-        'version': VERSION,
+        'version': version if version is not None else build_version(),
         'new_install_prompt_erase': True,
         'builds': [{'chipFamily': 'ESP32-S3', 'parts': [{'path': image, 'offset': offset}]}],
     }
@@ -102,7 +116,7 @@ def export(root: Path, python_exe: str, dry_run: bool = False) -> dict:
                '0xe000', str(boot_app0),
                '0x10000', str(firmware)]
     if dry_run:
-        return {'command': command, 'version': VERSION, 'firmware': str(firmware)}
+        return {'command': command, 'version': build_version(root), 'firmware': str(firmware)}
 
     website.mkdir(parents=True, exist_ok=True)
     print('Merging factory firmware using esptool:', flush=True)
@@ -113,8 +127,9 @@ def export(root: Path, python_exe: str, dry_run: bool = False) -> dict:
     if full_image.stat().st_size >= FLASH_SIZE or update_image.stat().st_size >= 0x400000:
         raise ValueError('Image exceeds the configured flash / app partition limit')
 
-    factory = generate_manifest(full_image.name, 0)
-    update = generate_manifest(update_image.name, APP_OFFSET)
+    version = build_version(root)
+    factory = generate_manifest(full_image.name, 0, version)
+    update = generate_manifest(update_image.name, APP_OFFSET, version)
     (website / 'manifest.json').write_text(json.dumps(factory, indent=2) + '\n', encoding='utf-8')
     (website / 'manifest-update.json').write_text(json.dumps(update, indent=2) + '\n', encoding='utf-8')
     entries = [
@@ -122,10 +137,17 @@ def export(root: Path, python_exe: str, dry_run: bool = False) -> dict:
         f'{sha256_file(update_image)}  {update_image.name}',
     ]
     (website / 'SHA256SUMS.txt').write_text('\n'.join(entries) + '\n', encoding='ascii')
+    (website / 'build-info.json').write_text(json.dumps({
+        'name': 'CrowPanel Rotary Buddy',
+        'version': version,
+        'chip': 'ESP32-S3',
+        'factory_sha256': sha256_file(full_image),
+        'update_sha256': sha256_file(update_image),
+    }, indent=2) + '\n', encoding='utf-8')
     print(f'Published images to {website}:', flush=True)
     for entry in entries:
         print('  ' + entry)
-    print('Deploy the entire web/ directory. Never swap update/factory images.', flush=True)
+    print('Ready for Cloudflare Pages to deploy the web/ directory.', flush=True)
     return {'factory': factory, 'update': update}
 
 
@@ -138,7 +160,7 @@ def main() -> int:
         return 0
     except (ValueError, FileNotFoundError, subprocess.CalledProcessError, OSError) as error:
         print(f'ERROR: {error}', file=sys.stderr)
-        print('First run BUILD_WINDOWS.bat, then EXPORT_WEB_WINDOWS.bat.', file=sys.stderr)
+        print('Build the firmware with PlatformIO before exporting.', file=sys.stderr)
         return 1
 
 

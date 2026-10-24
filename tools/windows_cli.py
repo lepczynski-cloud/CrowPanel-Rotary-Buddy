@@ -188,7 +188,7 @@ def build_command() -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build / flash CrowPanel Rotary Buddy USB HID")
-    parser.add_argument("command", choices=("build", "upload", "web"))
+    parser.add_argument("command", choices=("build", "upload"))
     parser.add_argument("--port", help="Optional Windows COM port, for example COM7")
     args = parser.parse_args()
 
@@ -209,15 +209,6 @@ def main() -> int:
     if args.command == "build":
         print("\nSuccess. Firmware binary is under .pio/build/crowpanel-rotary/.")
         return 0
-    if args.command == "web":
-        print("[Web export] Installing the pinned Espressif merge utility ...")
-        if run_command([str(PYTHON), "-m", "pip", "install", "--disable-pip-version-check",
-                        "esptool==4.8.1"]) != 0:
-            return 1
-        print("[Web export] Exporting browser install/update images ...")
-        return run_command([str(PYTHON), str(ROOT / "tools" / "export_web.py")])
-
-
     port = args.port or choose_port()
     if not port:
         print("Upload cancelled.")

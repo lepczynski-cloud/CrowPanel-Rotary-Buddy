@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 // CrowPanel 1.28-inch HMI ESP32-S3 rotary display (Elecrow DHE38128D).
-// These pin assignments are identical to the working v0.2.2 firmware.
+// Hardware pins follow Elecrow board wiring.
 namespace Config {
 constexpr int LCD_SCLK = 10;
 constexpr int LCD_MOSI = 11;
@@ -28,7 +28,7 @@ constexpr bool TOUCH_SWAP_XY = false;
 constexpr bool TOUCH_INVERT_X = false;
 constexpr bool TOUCH_INVERT_Y = false;
 
-// Volume scale: keeps the proven, half-speed v0.2.2 behavior.
+// Volume speed: 2 = slower, 1 = faster; tune to taste.
 // Both pages use the knob for host volume and the button for Play/Pause.
 constexpr int ENCODER_DIRECTION = 1;
 constexpr int ENCODER_EDGES_PER_STEP = 4;
@@ -46,7 +46,7 @@ constexpr int VOLUME_INDICATOR_INITIAL_PERCENT = 50;
 constexpr int VOLUME_INDICATOR_PERCENT_PER_REPORT = 2;
 constexpr unsigned long VOLUME_OVERLAY_MS = 2300;
 
-// Touch: same polling model as the known working v0.2.2 firmware.
+// CST816D is read by I2C polling so an IRQ polarity mismatch cannot block touch.
 constexpr unsigned long TOUCH_POLL_MS = 12;
 constexpr unsigned long TOUCH_MAX_TRACK_MS = 1300;
 constexpr unsigned long TOUCH_MIN_TAP_MS = 12;

@@ -1,0 +1,5 @@
+/firmware/*
+  Cache-Control: no-cache, must-revalidate
+
+/assets/*
+  X-Content-Type-Options: nosniff

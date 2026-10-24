@@ -1,8 +1,7 @@
 'use strict';
 
-// Firmware verification follows the same two-manifest approach as the author's
-// M5Stack Touch Control Deck web flasher. Never expose an install control if
-// the corresponding real binary was not published to this deployment.
+// Only offer firmware when the current deployment includes validated
+// ESP32-S3 images produced by its automated Cloudflare Pages build.
 const images = [
   { id: 'update', manifest: './firmware/manifest-update.json', expected: 'rotary-buddy.update.bin', offset: 65536 },
   { id: 'factory', manifest: './firmware/manifest.json', expected: 'rotary-buddy.factory.bin', offset: 0 }
@@ -25,14 +24,15 @@ async function checkImage(option) {
         parts[0].path !== option.expected) throw new Error('Unexpected binary');
     const binaryURL = new URL(parts[0].path, url);
     const binary = await fetch(binaryURL, { method: 'HEAD', cache: 'no-store' });
-    if (!binary.ok || Number(binary.headers.get('content-length') || '0') < 65536) {
+    const len = binary.headers.get('content-length');
+    if (!binary.ok || (len !== null && Number(len) < 65536)) {
       throw new Error('Published firmware missing or too small');
     }
     status.textContent = 'Firmware v' + json.version + ' ready.';
     status.classList.add('ready');
     button.hidden = false;
   } catch (_) {
-    status.textContent = 'Firmware binary not published yet. Build with EXPORT_WEB_WINDOWS.bat and deploy the web directory.';
+    status.textContent = 'Installer temporarily unavailable. Please check the latest deployment or reload this page.';
     status.classList.add('missing');
     button.hidden = true;
   }

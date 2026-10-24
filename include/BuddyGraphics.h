@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include "BuddyBrain.h"
 #include "MediaLogic.h"
 
@@ -261,6 +262,48 @@ inline Face faceFor(Mood mood, uint32_t elapsed, uint32_t now) {
         case Mood::Bubbles: f.mouth = 2; f.eyeStyle = 2; break;
         case Mood::Rainbow: f.eyeStyle = 2; f.mouth = 1; break;
         case Mood::Peekaboo: f.winkLeft = elapsed % 500 < 200; f.winkRight = elapsed % 500 >= 200; f.mouth = 1; break;
+        case Mood::Wave: f.winkRight = elapsed % 550 < 230; f.mouth = 1; break;
+        case Mood::Squint: f.eyeHeight = 11; f.mouth = 3; break;
+        case Mood::Glance: f.gazeX = elapsed % 600 < 300 ? -11 : 11; f.mouth = 1; break;
+        case Mood::BigGrin: f.eyeStyle = 2; f.mouth = 4; f.cheeks = true; break;
+        case Mood::Hiccup: f.eyeHeight = 17 + ix(fabsf(wave(now, .022f)) * 15); f.mouth = 2; break;
+        case Mood::Sneeze: f.eyeStyle = elapsed < 600 ? 1 : 0; f.mouth = elapsed < 600 ? 2 : 4; break;
+        case Mood::Victory: f.eyeStyle = 4; f.mouth = 4; f.eyeColor = GOLD; break;
+        case Mood::Disco: f.eyeStyle = 2; f.mouth = 4; f.tilt = ix(wave(now, .018f) * 9); break;
+        case Mood::Confetti: f.eyeStyle = 2; f.mouth = 4; break;
+        case Mood::Orbit: f.gazeX = ix(11 * cosf(elapsed * .008f)); f.gazeY = ix(8 * sinf(elapsed * .008f)); break;
+        case Mood::Fireworks: f.eyeStyle = 4; f.mouth = 2; f.eyeColor = GOLD; break;
+        case Mood::PixelRain: f.eyeWidth = 24; f.eyeHeight = 24; f.mouth = 2; break;
+        case Mood::CodeRain: f.gazeY = ix(wave(now, .005f) * 7); f.eyeColor = GREEN; break;
+        case Mood::Rocket: f.eyeStyle = 4; f.mouth = 2; break;
+        case Mood::Comet: f.gazeX = elapsed % 800 < 400 ? 10 : -10; f.mouth = 2; break;
+        case Mood::CloudFloat: f.eyeHeight = 22; f.eyeStyle = 2; f.mouth = 1; break;
+        case Mood::Rainy: f.eyeHeight = 24; f.mouth = 3; break;
+        case Mood::Snowfall: f.eyeStyle = 2; f.mouth = 1; break;
+        case Mood::Wiggle: f.tilt = ix(wave(now, .025f) * 8); f.mouth = 1; break;
+        case Mood::Stretch: f.eyeHeight = 15 + ix(fabsf(wave(now, .006f)) * 26); f.mouth = 2; break;
+        case Mood::Boop: f.eyeWidth = 39; f.eyeHeight = 40; f.mouth = 2; break;
+        case Mood::Glitch: f.eyeColor = elapsed % 210 < 90 ? VIOLET : CYAN; f.gazeX = elapsed % 140 < 70 ? 7 : -7; f.mouth = 3; break;
+        case Mood::Heartbeat: f.eyeStyle = 3; f.mouth = 1; f.eyeColor = ROSE; break;
+        case Mood::Loading: f.eyeStyle = 1; f.eyebrow = 1; f.mouth = 3; break;
+        case Mood::Deploy: f.eyeStyle = 4; f.mouth = 1; f.eyeColor = GREEN; break;
+        case Mood::Build: f.eyeStyle = 2; f.mouth = 1; f.eyeColor = GREEN; break;
+        case Mood::BugHunt: f.gazeX = elapsed % 450 < 225 ? -12 : 12; f.eyebrow = -1; break;
+        case Mood::Coffee: f.eyeHeight = 15; f.mouth = 2; break;
+        case Mood::Snack: f.mouth = 2; f.gazeY = 8; break;
+        case Mood::Debug: f.eyeHeight = 23; f.eyebrow = 1; f.gazeX = -7; break;
+        case Mood::HighFive: f.eyeStyle = 2; f.mouth = 4; break;
+        case Mood::Panic: f.eyeWidth = 38; f.eyeHeight = 44; f.mouth = 2; f.eyeColor = ROSE; break;
+        case Mood::Weekend: f.eyeStyle = 2; f.mouth = 4; f.tilt = ix(wave(now, .016f) * 8); break;
+        case Mood::Rollback: f.eyeStyle = 5; f.mouth = 3; break;
+        case Mood::SleepTalk: f.eyeStyle = 1; f.mouth = 1; break;
+        case Mood::Ping: f.eyeWidth = 23; f.eyeHeight = 23; f.mouth = 2; break;
+        case Mood::Typing: f.eyeHeight = 27; f.gazeY = 8; break;
+        case Mood::Freeze: f.eyeWidth = 28; f.eyeHeight = 27; f.mouth = 0; break;
+        case Mood::Zoomies: f.eyeStyle = 4; f.mouth = 4; f.tilt = ix(wave(now, .04f) * 13); break;
+        case Mood::Noodle: f.mouth = 5; f.eyeHeight = 23; break;
+        case Mood::Hypno: f.eyeStyle = 5; f.mouth = 1; break;
+        case Mood::Magnet: f.eyeStyle = 3; f.mouth = 1; f.eyeColor = VIOLET; break;
         case Mood::Wake: f.eyeStyle = elapsed < 350 ? 1 : 0; f.mouth = 1; f.eyeHeight = elapsed < 300 ? 9 : 33; break;
         case Mood::Sleep: f.eyeStyle = 1; f.mouth = 0; break;
         case Mood::Dream: f.eyeStyle = 1; f.mouth = 1; break;
@@ -404,9 +447,137 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
             arc(g, 120, 120, 94, 200, 340, GOLD, 3);
             arc(g, 120, 120, 99, 200, 340, SKY, 3);
             break;
+        case Mood::Wave:
+        case Mood::HighFive:
+            for (int i = 0; i < 3; ++i) {
+                arc(g, 205, 121, 9 + i * 8, 220 + ix(12 * wave(now, .009f)), 320, i == 0 ? CYAN : SKY, 2);
+            }
+            break;
+        case Mood::Disco:
+        case Mood::Zoomies:
+        case Mood::Wiggle:
+        case Mood::Weekend:
+            for (int i = 0; i < 9; ++i) {
+                const float a = t * 5 + i * .72f;
+                spark(g, 120 + ix(cosf(a) * 92), 121 + ix(sinf(a) * 92), 2 + i % 4,
+                      i % 2 ? ROSE : GOLD);
+            }
+            break;
+        case Mood::Victory:
+        case Mood::Confetti:
+        case Mood::Fireworks:
+            for (int i = 0; i < 14; ++i) {
+                const float a = i * .49f + t * (i % 3 == 0 ? -2 : 2);
+                const int r = 41 + ix(fmodf(t * (28 + i * 3), 61));
+                spark(g, 120 + ix(cosf(a) * r), 120 + ix(sinf(a) * r), 2 + i % 3,
+                      i % 3 == 0 ? CYAN : (i % 3 == 1 ? ROSE : GOLD));
+            }
+            break;
+        case Mood::Orbit:
+        case Mood::Magnet:
+            for (int i = 0; i < 3; ++i) {
+                const float a = t * 3 + i * 2.094f;
+                g.fillCircle(120 + ix(cosf(a) * 95), 120 + ix(sinf(a) * 95), 3 + i, i == 0 ? ROSE : CYAN);
+            }
+            break;
+        case Mood::PixelRain:
+        case Mood::CodeRain:
+            for (int i = 0; i < 14; ++i) {
+                const int x = 32 + (i * 41) % 174;
+                const int y = 35 + (ix(t * (18 + i * 3)) + i * 19) % 168;
+                g.fillRect(x, y, 2 + i % 3, 3 + i % 5, mood == Mood::CodeRain ? GREEN : SKY);
+            }
+            break;
+        case Mood::Rocket:
+        case Mood::Comet:
+            for (int i = 0; i < 6; ++i) {
+                const int x = 36 + (ix(t * 55) + i * 23) % 170;
+                const int y = 196 - (i * 29 + ix(t * 25)) % 140;
+                g.drawLine(x, y, x - 6 - i % 3, y + 6 + i % 4, i % 2 ? GOLD : CYAN);
+            }
+            break;
+        case Mood::CloudFloat:
+            for (int i = 0; i < 3; ++i) {
+                const int x = 33 + i * 74 + ix(wave(now, .002f, i) * 8);
+                g.drawCircle(x, 61 + i % 2 * 18, 7 + i % 2 * 3, SKY);
+            }
+            break;
+        case Mood::Rainy:
+        case Mood::Snowfall:
+            for (int i = 0; i < 13; ++i) {
+                const int x = 42 + (i * 37) % 155;
+                const int y = 38 + (ix(t * (24 + i * 3)) + i * 31) % 161;
+                if (mood == Mood::Rainy) g.drawLine(x, y, x - 3, y + 6, SKY);
+                else spark(g, x, y, 2, WHITE);
+            }
+            break;
+        case Mood::Hiccup:
+        case Mood::Sneeze:
+        case Mood::Boop:
+            for (int i = 0; i < 4; ++i) {
+                const float a = t * 7 + i * 1.57f;
+                spark(g, 120 + ix(cosf(a) * 74), 123 + ix(sinf(a) * 70), 2 + i, GOLD);
+            }
+            break;
+        case Mood::Stretch:
+            arc(g, 120, 120, 94, 220, 310 + 45 * wave(now, .005f), SKY, 2);
+            break;
+        case Mood::Glitch:
+            for (int i = 0; i < 4; ++i) {
+                const int y = 67 + i * 33 + ix(wave(now, .023f, i) * 4);
+                g.drawLine(32, y, 48 + i * 12, y, i % 2 ? VIOLET : ROSE);
+            }
+            break;
+        case Mood::Heartbeat:
+            heart(g, 204, 69 + ix(wave(now, .01f) * 4), 1, ROSE);
+            break;
+        case Mood::Loading:
+        case Mood::Build:
+        case Mood::Deploy:
+            for (int i = 0; i < 7; ++i) {
+                const float a = (i * 51 + ix(t * 135)) * DEG;
+                g.fillCircle(120 + ix(cosf(a) * 92), 120 + ix(sinf(a) * 92), 2 + i % 2, i % 2 ? GREEN : CYAN);
+            }
+            break;
+        case Mood::BugHunt:
+        case Mood::Debug:
+            g.drawCircle(202, 71, 10, GOLD);
+            g.drawLine(209, 78, 217, 86, GOLD);
+            break;
+        case Mood::Coffee:
+        case Mood::Snack:
+            g.drawRoundRect(191, 65, 19, 21, 3, GOLD);
+            g.drawCircle(214, 74, 5, SKY);
+            break;
+        case Mood::Panic:
+        case Mood::Rollback:
+            for (int i = 0; i < 4; ++i)
+                spark(g, 36 + i * 56, 55 + (i % 2) * 141, 5, ROSE);
+            break;
+        case Mood::Ping:
+            for (int i = 0; i < 3; ++i)
+                g.drawCircle(120, 120, 64 + i * 13 + ix(fabsf(wave(now, .007f)) * 3), i % 2 ? SKY : DIM);
+            break;
+        case Mood::Typing:
+            for (int i = 0; i < 7; ++i)
+                g.fillRoundRect(49 + i * 23, 199, 16, 7, 2, (elapsed / 125 + i) % 3 == 0 ? CYAN : DIM);
+            break;
+        case Mood::Freeze:
+            for (int i = 0; i < 7; ++i)
+                spark(g, 48 + i * 24, 188 - i % 3 * 13, 3, SKY);
+            break;
+        case Mood::Noodle:
+            for (int i = 0; i < 4; ++i)
+                arc(g, 120, 167, 15 + i * 5, 6 + 12 * sinf(t * 5), 135 + i * 8, ROSE, 2);
+            break;
+        case Mood::Hypno:
+            for (int i = 0; i < 3; ++i)
+                arc(g, 120, 122, 58 + i * 14, 10 + ix(t * 70), 160 + ix(t * 70), VIOLET, 2);
+            break;
         case Mood::Sleep:
         case Mood::Sleepy:
         case Mood::Dream:
+        case Mood::SleepTalk:
             text(g, "z", 202, 73 - ix((now % 3100) / 90), 4, SKY);
             text(g, "Z", 214, 52 - ix((now % 2600) / 90), 4, VIOLET);
             if (mood == Mood::Dream) star(g, 38, 47, 8, GOLD);
@@ -423,13 +594,13 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
 }
 
 template <typename G>
-void buddy(G &g, uint32_t now, Mood mood, uint32_t elapsed,
+void buddy(G &g, uint32_t now, Mood mood, uint32_t elapsed, const char *quip,
            bool volumeVisible, int volumePct, bool usbConnected) {
     base(g, now);
     // Ambient aurora loops and engraved faceplate create depth without images.
     arc(g, 120, 120, 106, 210, 325, VIOLET, 2);
     arc(g, 120, 120, 100, 18, 143, SKY, 2);
-    const bool sleeping = mood == Mood::Sleep || mood == Mood::Dream;
+    const bool sleeping = mood == Mood::Sleep || mood == Mood::Dream || mood == Mood::SleepTalk;
     const float breathe = sleeping ? 1.5f * wave(now, .0018f) : 1.0f * wave(now, .002f);
     g.fillCircle(120, 123, 90 + ix(breathe), EDGE);
     g.fillCircle(120, 123, 83 + ix(breathe), INNER);
@@ -455,6 +626,14 @@ void buddy(G &g, uint32_t now, Mood mood, uint32_t elapsed,
         g.drawLine(145, 86 + sign * 5, 180, 83 - sign * 5, f.eyeColor);
     }
     buddyExtras(g, mood, elapsed, now);
+    // Show a short joke without covering the interactive face or the volume ring.
+    // The 240px circular screen has less than 190px of usable width at y=47.
+    if (quip && *quip && !volumeVisible) {
+        const size_t count = strlen(quip);
+        const int font = count > 14 ? 1 : 2;
+        g.fillRoundRect(36, 35, 168, 26, 11, BG);
+        text(g, quip, 120, 48, font, (mood == Mood::Deploy || mood == Mood::Build) ? GREEN : GOLD);
+    }
     if (!volumeVisible) {
         text(g, sleeping ? "DREAM MODE" : "TAP TO PLAY", 120, 210, 1, MUTED);
     }

@@ -1,225 +1,198 @@
 # CrowPanel Rotary Buddy
 
-**An animated desktop companion and USB media dial for the Elecrow 1.28-inch CrowPanel ESP32-S3 rotary touchscreen.**
+**An expressive desktop companion and premium USB media dial, built for the Elecrow CrowPanel 1.28-inch ESP32-S3 Rotary Display.**
 
-[![MIT License](https://img.shields.io/badge/license-MIT-teal)](LICENSE)
-![Hardware](https://img.shields.io/badge/hardware-ESP32--S3%20CrowPanel-blue)
-![Firmware](https://img.shields.io/badge/firmware-v0.3.0--beta-orange)
+[![License: MIT](https://img.shields.io/badge/license-MIT-teal.svg)](LICENSE)
+[![ESP32-S3](https://img.shields.io/badge/board-ESP32--S3-1aadc8)](https://www.elecrow.com/wiki/CrowPanel_1.28inch-HMI_ESP32_Rotary_Display.html)
+[![PlatformIO](https://img.shields.io/badge/firmware-PlatformIO-orange)](platformio.ini)
+[![Browser installer](https://img.shields.io/badge/flash-from%20browser-7258ce)](https://crowpanel-rotary-buddy.lepczynski.it/)
 
-Two swipeable screens. One universal volume knob. A tiny character with a lot of personality. No Arduino IDE, desktop agent, Wi-Fi account, cloud AI, or proprietary graphics files.
+**Web installer:** https://crowpanel-rotary-buddy.lepczynski.it/  
+**Source:** https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy
 
-**Planned web installer:** <https://crowpanel-rotary-buddy.lepczynski.it/> (the domain is a deployment target, not necessarily live yet).
+Turn the knob to adjust volume, press it to play or pause, or use the round touchscreen to skip tracks and mute sound. When you're done, your dial becomes a little companion with animated eyes, silly expressions, tiny jokes and dreams. No Bluetooth pairing, desktop daemon, cloud access or Arduino IDE required.
 
-> **Status:** v0.3.0-beta is a new UI/firmware redesign built on the **previously hardware-tested v0.2.2 touch driver and HID configuration**. Offline C++ logic tests, full-source syntax validation against simulated APIs, and web installer checks have passed. A real device flash and a complete PlatformIO toolchain build are **not** confirmed in this release environment. Please build and test the firmware on your own CrowPanel before publishing a public installer binary.
+The ESP32-S3 behaves as a standard **USB HID consumer-media controller**. It supports Windows, macOS and Linux (subject to the media-player behavior of the host OS), so there is no need to detect or configure an operating system profile.
 
-## Features
+## Two screens
 
-### 1. MEDIA: a premium minimalist controller
-
-- **Turn knob:** volume up/down on Windows, macOS, and Linux using standard USB Consumer HID reports.
-- **Press knob:** Play/Pause in any mode.
-- **Long-press knob:** switch between the two screens (backup navigation method).
-- **Touch:** four large targets for Previous, Play/Pause, Next, and Mute.
-- **Skip track:** animated glowing particles, sparks, and a traveling arc.
-- **Play/Pause/Mute:** a short animated acknowledgement.
-- **Adjust volume:** smooth, animated progress arc labeled **0–100% ESTIMATED**.
-
-**A note on volume accuracy:** This device sends ordinary USB volume-up/volume-down key presses. HID has no reliable way to read the real Windows/macOS/Linux mixer level back from the host. The 0–100% ring is therefore an **estimate calculated locally** from turns, starting at 50%. Its reading can differ from the actual computer volume, especially after you use the computer's volume keys/mixer. A truly synchronized percentage requires optional host-side software, which this project intentionally does not depend on. The play/pause icon also represents a toggle, not verified player state.
-
-### 2. BUDDY: an expressive desk companion
-
-A procedural, original character with **43 animation and expression states**, including:
-
-- Quiet idle, single/double blink, left/right/up/down glances, side-eye, eye rolls.
-- Happy eyes, laughing, smiling, giggling, shyness, blush, surprise, confused, pouting, grumpy, mischief.
-- Left/right wink, tongue, peekaboo, shy peek, yawn, sleepy face, sing, playful tears.
-- Hearts, star eyes, glittering sparks, bubbles, rainbow arcs, dizzy spirals, light beams.
-- Playful, screen-only remarks like **PSST!**, **HI...**, **COFFEE?** and **NICE!** (no audio or speech synthesis).
-- Party, bouncing, thinking, idea, countdown, dreamy stars, sleep, wake-up.
-
-**Personality pacing:** ~76% of random idle choices are subtle. Bigger moments are less frequent. It is *not* a loud or constantly moving slideshow. Tap the Buddy screen to trigger a different reaction. The engine runs entirely offline and does not imitate/redistribute any commercial robot's animation assets.
-
-**Sleep lifecycle (default):**
-
-| Situation | Behavior |
+| MEDIA | BUDDY |
 | --- | --- |
-| 30 seconds of no input on MEDIA | Automatically open BUDDY. |
-| Normal BUDDY idle | Relaxed glances and blinking, occasional playful reactions. |
-| Five minutes of no input | Sleepy expression, then breathing/sleeping with rare dreams. |
-| Tap, turn, press, or swipe | Wake up or respond; resume normal behavior. |
-| Swipe left/right (also vertical) | Immediately switch between MEDIA and BUDDY. |
+| Large **Previous**, **Play/Pause**, **Next** and **Mute** touch targets. Animated track-skip sparks, glowing rings and an animated 0–100% volume estimate. | **85 animated expression and effect states**, **72 rotating English captions**, responsive boops, blinking, laughter, rain, fireworks, coding jokes, dreams and a gentle sleep cycle. |
 
-The timing and animation frequency are configurable in `include/Config.h` and `include/BuddyBrain.h`. The sleep state is an **animation**, not a USB sleep or power-off function. The screen stays on; brightness can be set in the firmware.
+**Controls**
 
-## Supported hardware
-
-Only **Elecrow CrowPanel 1.28-inch HMI ESP32 Rotary Display, 240 × 240 IPS Round Touch Knob Screen**, with native USB **ESP32-S3**, GC9A01 SPI display, CST816D I2C touch and built-in quadrature encoder.
-
-| Device interface | Hardware |
+| Action | Result |
 | --- | --- |
-| Display | GC9A01, SPI: CLK 10, MOSI 11, DC 3, CS 9, RST 14 |
-| Touch | CST816D: SDA 6, SCL 7, INT 5, RST 13 |
-| Encoder | A 45, B 42, button 41 |
-| Backlight | GPIO 46 |
-| Power gate | GPIO 1 |
-| Native USB | ESP32-S3 HID / ROM download port |
-| Flash | 16 MB, factory application at `0x10000` |
+| Rotate the dial on either screen | Volume up/down (configurable sensitivity). |
+| Short press the knob | Play/Pause. |
+| Long press the knob, about 0.65 s | Switch between MEDIA and BUDDY. |
+| Swipe left, right, up or down | Switch between the two screens without triggering a media tap. |
+| Tap a media button | Previous, Play/Pause, Next or Mute. |
+| Tap Buddy | Trigger a randomly selected expression or joke. |
+| Leave MEDIA idle for 30 seconds | Automatically enter BUDDY mode. |
+| Leave the device idle for 5 minutes | Buddy falls asleep and occasionally dreams or sleep-talks. |
+| Tap, turn or press while Buddy sleeps | Wake it up. |
 
-Source: [official Elecrow Wiki](https://www.elecrow.com/wiki/CrowPanel_1.28inch-HMI_ESP32_Rotary_Display.html). **Not compatible** with the M5Stack CoreS3, generic ESP32-C3 rotary displays, or a random ESP32 board with different pin assignments.
+Buddy prefers gentle, infrequent movements, with louder reactions occurring less often. Sample jokes include `LET'S GO PROD!`, `WORKS ON MINE!`, `CI SAYS YES!`, `BUG? FEATURE!`, `IS IT DNS?`, `COFFEE FIRST`, `FRIDAY DEPLOY?` and `ROLLBACK?`.
 
-## How to control it
+**These captions are visual jokes only.** They never open apps, run commands or deploy software to production.
 
-| Input | MEDIA page | BUDDY page |
-| --- | --- | --- |
-| Turn encoder | Change computer volume, animate ring | Change computer volume, briefly show volume bubble |
-| Short-press encoder | Play/Pause | Play/Pause |
-| Long-press encoder | Switch to BUDDY | Switch to MEDIA |
-| Swipe horizontally or vertically | Switch to BUDDY | Switch to MEDIA |
-| Short tap on touchscreen | Activate one of four media buttons | Trigger a random playful expression |
-| Leave untouched | Opens Buddy after 30 seconds | Slowly drifts into sleep after five minutes |
+All graphics are hand-coded C++ primitives rendered directly on the 240 × 240 round display. No GIFs, cloud API, microphone, remote server or animation downloads are involved. The website's metallic product render is an original illustration, not a photograph of a finished unit.
 
-**Anti-accidental-action handling:** A swipe cannot also fire a media button. A valid media tap must start and end on the *same* button. When the large volume overlay is visible, the first screen tap dismisses it instead of activating an invisible media button. The encoder stays a volume controller on both pages.
+**Important limitation:** standard USB HID can send volume commands but cannot read the actual system volume. The displayed 0–100% gauge is a local *estimate*, starting at a configurable value. Volume changes made directly on the computer will not be reflected automatically. The device does not receive song titles or playback status either.
 
-The media HID usages work across modern Windows, macOS, and Linux desktop media-session implementations. Since the firmware contains **no OS-specific macros**, there is no host selection menu.
+## Install firmware from your browser
 
-## Windows: build and flash WITHOUT Arduino IDE
+1. Open **https://crowpanel-rotary-buddy.lepczynski.it/** in **Chrome or Edge on a desktop computer**.
+2. Connect the **Elecrow CrowPanel 1.28-inch ESP32-S3 rotary dial** with its data-capable USB lead. Do not use the firmware with a different ESP32 device.
+3. Enter flashing mode: **hold BOOT**, briefly press and release **RESET**, then release **BOOT**.
+4. Choose **Factory installation** for a new or reset device, or **Update firmware** for an existing device with the same partition layout. Click the install button and select the ESP32-S3 serial port.
+5. Follow the browser flashing dialog. Press **RESET** when flashing completes if the app does not start automatically.
 
-**Requirements:** Windows 10/11; Python 3.9+ (with `venv` and pip); Internet connection **for first-time PlatformIO installation**; the original USB data cable; ESP32-S3 serial driver if needed. No Arduino IDE and no resident PC application.
+The temporary serial port can disappear when the ESP32 boots as a USB HID device. This is normal. Everyday controls work without any installed PC software. The browser installer uses [ESP Web Tools](https://esphome.github.io/esp-web-tools/) and needs HTTPS and Web Serial support.
 
-1. Download or clone this project, then extract it into its own directory.
-2. Run **`BUILD_WINDOWS.bat`**. On first use, the script installs PlatformIO inside a local `.venv` and downloads the pinned board packages and LovyanGFX.
-3. Only if the build succeeds, run **`FLASH_WINDOWS.bat`**.
-4. When prompted: **hold BOOT, tap RESET, release BOOT**. The ROM bootloader COM port should appear on Windows. Press Enter in the installer.
-5. The script identifies the Espressif serial port, prompts if necessary, flashes the firmware, and reports success/failure.
-6. Tap RESET once if the new firmware does not automatically start. The ESP32-S3 normally stops presenting a COM port after starting USB HID. This is expected.
+**Choose carefully:**
 
-Use `FLASH_WINDOWS.bat` again for later updates.
+- **Update** flashes only the application at `0x10000`. It can retain settings, *provided you do not select "Erase device"* and the partition layout is unchanged.
+- **Factory** writes a merged bootloader, partition table, boot metadata and application image beginning at `0x0`. To clear existing settings, select **Erase device** in the installer. This mode is intended for first installations and recovery.
 
-**CLion / PlatformIO CLI:** `pio run -e crowpanel-rotary`. Upload with `pio run -e crowpanel-rotary -t upload --upload-port COM7` (replace COM7). The `.bat` scripts and firmware remain independent of any IDE.
+## Automated GitHub → Cloudflare Pages builds
 
-**macOS / Linux development:** install PlatformIO CLI, run `pio run -e crowpanel-rotary`, then upload with `pio run -t upload -e crowpanel-rotary --upload-port <serial-port>`. Native USB HID operation needs no desktop daemon on any supported OS.
-
-## Browser firmware installer (ESP Web Tools)
-
-This follows the **same overall mechanism** as [M5Stack Touch Control Deck](https://m5stack-touch-control-deck.lepczynski.it/): ESP Web Tools + Web Serial on HTTPS, one **application-only update** image and one **full factory** image. The static website is inside `web/`. An attractive preview is provided even before flashing binaries are built. The hero image in `web/assets/rotary-buddy-device.webp` is an **original illustrative render**, not an official Elecrow photograph or an exact screenshot of firmware output. The Buddy/Media switch on the webpage previews the two interfaces; it does not control a connected device. The realistic round metal dial and dark glass reflect the hardware form factor. No external image services are needed when the website is deployed.
-
-> **IMPORTANT:** This repository does **not** contain a precompiled v0.3.0-beta binary in the initial source ZIP. The website correctly DISABLES both install buttons until it can find a compiled, published image. Do not upload an older v0.2.2 `.bin` under a v0.3.0-beta filename.
-
-### Generate real web firmware
-
-On Windows, **after confirming the PlatformIO build succeeds**, run:
+**Nothing needs to be compiled or exported manually after updating GitHub.** Every push to the GitHub `main` branch triggers Cloudflare Pages to compile the firmware and publish fresh web-flashing images alongside the website. This uses native **Cloudflare Pages Git integration**, not GitHub Actions, API tokens or a hosted backend.
 
 ```text
-EXPORT_WEB_WINDOWS.bat
+Edit code → git push main → Cloudflare Pages build
+                                  |
+                                  +-- C++ logic & rendering tests
+                                  +-- Installer / release tests
+                                  +-- PlatformIO firmware compilation
+                                  +-- esptool factory + update image export
+                                  +-- checksum and manifest verification
+                                  +-- atomic web/ site publication
+                                           |
+                                           +-- browser can flash latest build
 ```
 
-The script compiles the exact current source, installs pinned `esptool`, then creates:
+### One-time Cloudflare Pages setup
+
+Create or open a **Cloudflare Pages project connected to this GitHub repository** (a Git-integrated Pages project, not a Workers static-assets build). Configure:
+
+| Cloudflare Pages setting | Value |
+| --- | --- |
+| Production branch | `main` |
+| Framework preset | `None` |
+| **Build command** | **`bash scripts/build_pages.sh`** |
+| Build output directory | `web` |
+| Root directory | Repository root (leave the advanced field empty) |
+| Build image | `v3` |
+| Environment variables / API secrets | None required |
+| Custom domain | `crowpanel-rotary-buddy.lepczynski.it` |
+
+If your existing Pages project currently uses `exit 0` as its build command, **replace that with `bash scripts/build_pages.sh`** in **Workers & Pages → your project → Settings → Builds**. Keep the output folder `web`. Leave automatic production deployments enabled and confirm the repository is connected to the correct `main` branch.
+
+After this one-time setup, simply push changes. Cloudflare downloads pinned build tools, compiles the application, creates the `.bin` files and manifests, and deploys everything together. The version shown on the installer includes the current Git commit's short hash, for example `1.0.0+gabcdef0` (the actual hash will vary).
+
+Generated `web/firmware/` binaries are **intentionally gitignored**. They are produced during deployment and never need to be committed or copied by hand. When compilation, verification or any test fails, the Pages build exits nonzero and **the previous successful deployment remains available**. View failures under **Cloudflare Pages → Deployments → Build log**.
+
+The first build needs Internet access and sufficient build time to download PlatformIO, the Espressif toolchain and LovyanGFX. Cloudflare Pages builds have a 20-minute timeout, so if downloads exceed that limit, inspect the build log. Cloudflare setup and the first online firmware flash have not been performed automatically by these source files.
+
+### What the build generates automatically
 
 ```text
 web/firmware/
-  manifest.json                    # ESP32-S3 factory installer, offset 0
-  manifest-update.json             # ESP32-S3 application-only updater, 0x10000
-  rotary-buddy.factory.bin         # ESP32-S3 bootloader + partitions + boot_app0 + firmware
-  rotary-buddy.update.bin          # app partition only; preserves NVS IF NOT erased
-  SHA256SUMS.txt                    # verify the images you publish
+├── manifest.json                 ESP Web Tools factory manifest (offset 0)
+├── manifest-update.json          ESP Web Tools update manifest (offset 0x10000)
+├── rotary-buddy.factory.bin      Merged ESP32-S3 bootloader, partitions and application
+├── rotary-buddy.update.bin       Application partition only
+├── SHA256SUMS.txt                 SHA-256 checksums for both binaries
+└── build-info.json               Git-derived build version and matching hashes
 ```
 
-The merged factory image uses the bootloader and the partition files from **your actual PlatformIO installation**, with the ESP32-S3 flash offsets taken from the Espressif tooling: bootloader `0x0`, partitions `0x8000`, boot app metadata `0xe000`, application `0x10000`. Firmware targets **16 MB / DIO**. Generated images should be manually flashed/tested on a real unit **before publishing**.
+The two installers link to images generated **from the exact same Git commit as the published website**. The site checks the manifests and binaries before revealing the install buttons. The layout targets **ESP32-S3 with 16 MB flash in DIO mode**.
 
-### Cloudflare Pages and the custom subdomain
+### Local developer build (optional)
 
-1. Create a public GitHub repository named `CrowPanel-Rotary-Buddy` under `lepczynski-cloud`, and push this project's source.
-2. After building and testing the firmware, **commit the five generated `web/firmware/` files** as well. They are necessary for the GitHub-integrated static installer to function. Avoid committing `.pio/`, `.venv/`, or intermediate build outputs.
-3. In **Cloudflare > Workers & Pages > Create application > Pages**, connect the repository to a new project. Use the project root as root directory, **`exit 0`** as the no-op build command (if a command is required) and **`web`** as the output directory. No runtime backend or server is needed.
-4. Add custom domain **`crowpanel-rotary-buddy.lepczynski.it`** to this *new* Pages project. Cloudflare provides HTTPS. This domain requires the owner's DNS/Pages configuration: adding the source files alone does not create the live domain.
-5. Open the new site from Chrome/Edge on desktop. Use the included data USB cable and put ESP32-S3 into **BOOT + RESET** download mode.
+You do not need any of these steps for GitHub-to-Cloudflare publication. To customize or debug the project, install Python 3.9 or newer on Windows and use:
 
-The website checks that both manifest files and their `.bin` files exist before presenting the install buttons, so visitors do not see broken downloads.
+- `BUILD_WINDOWS.bat` to create a local PlatformIO build.
+- `FLASH_WINDOWS.bat` for direct USB flashing and automatic ESP32-S3 COM-port selection after BOOT + RESET.
 
-### Update vs factory: choose carefully
-
-- **Update:** flashes **only `firmware.bin` at `0x10000`**. This works for the same partition layout (the layout remains compatible with v0.2.2). **DO NOT choose `Erase device`** in the ESP Web Tools dialog if you want to preserve settings; the browser flasher may offer an erase even when you choose the update card.
-- **Factory:** merged image at `0x0`, including bootloader, partition table and `boot_app0`. It resets stored configuration and is appropriate for a new device, a clean reset or recovery after incorrect partition changes.
-
-ESP Web Tools uses browser Web Serial; it cannot flash from Safari/iOS and cannot run without HTTPS. Read the flashing dialog, verify the connected board, and do not disconnect the USB cable during flashing. See [ESP Web Tools documentation](https://esphome.github.io/esp-web-tools/) and [Espressif esptool reference](https://docs.espressif.com/projects/esptool/en/release-v4/esp32s3/esptool/basic-commands.html).
+On Linux/macOS with PlatformIO installed: `pio run -e crowpanel-rotary`. PlatformIO board settings and dependencies are in `platformio.ini`.
 
 ## Configuration
 
-All tunable defaults are in `include/Config.h`:
+Edit `include/Config.h`. The defaults include:
 
-| Parameter | Default | Meaning |
+| Key | Default | Description |
 | --- | --- | --- |
-| `AUTO_BUDDY_AFTER_MS` | 30000 | Idle MEDIA -> BUDDY delay |
-| `SLEEP_AFTER_MS` | 300000 | Time without user input before sleepy/dream modes |
-| `FRAME_INTERVAL_MS` | 45 | Approx. 22 graphical updates per second |
-| `VOLUME_PULSES_PER_DETENT` | 3 | Normal volume pulses, before division |
-| `FAST_VOLUME_PULSES` | 5 | Volume pulse acceleration while turning quickly |
-| `VOLUME_SPEED_DIVISOR` | 2 | Matches the validated half-speed v0.2.2 feel |
-| `VOLUME_INDICATOR_INITIAL_PERCENT` | 50 | Startup *estimated* volume |
-| `VOLUME_INDICATOR_PERCENT_PER_REPORT` | 2 | Visual guess per USB volume pulse |
-| `DEFAULT_BRIGHTNESS` | 85 | Screen backlight PWM percent |
-| `USE_FRAMEBUFFER` | true | Smooth buffered draw, falls back if allocation fails |
-| `TOUCH_SWIPE_MIN_PX` | 43 | Minimum deliberate swipe distance |
+| `AUTO_BUDDY_AFTER_MS` | `30000` | Media-to-Buddy idle transition. |
+| `SLEEP_AFTER_MS` | `300000` | Sleep after five minutes with no user input. |
+| `FRAME_INTERVAL_MS` | `45` | Approximately 22 animation frames per second. |
+| `VOLUME_SPEED_DIVISOR` | `2` | Half-rate knob sensitivity. |
+| `VOLUME_PULSES_PER_DETENT` | `3` | Normal USB volume pulse count before division. |
+| `FAST_VOLUME_PULSES` | `5` | Fast-spin pulses before division. |
+| `VOLUME_INDICATOR_INITIAL_PERCENT` | `50` | Starting local volume estimate. |
+| `DEFAULT_BRIGHTNESS` | `85` | Backlight brightness as a percentage. |
+| `TOUCH_SWIPE_MIN_PX` | `43` | Swipe distance threshold. |
+| `USE_FRAMEBUFFER` | `true` | Smooth sprite drawing, with direct-render fallback. |
 
-Behavior schedules and reaction choices are in `include/BuddyBrain.h`; all artwork and colors are in `include/BuddyGraphics.h`. You may customize them without graphic editors or binary animation assets. The character does **not** listen, speak, track music tempo, recognize you, read PC volume, or use AI; these would require additional hardware or software.
+`include/BuddyBrain.h` contains the animation scheduler and 72 short English jokes. `include/BuddyGraphics.h` defines the round display artwork and effects. Both files are ordinary C++, so adding your own mood requires no third-party graphics tool.
 
-## Project files
+## Repository structure
 
 ```text
 CrowPanel-Rotary-Buddy/
-├── src/main.cpp                 USB HID, inputs, transitions and rendering loop
-├── include/
-│   ├── Config.h                 Pins and all editable settings
-│   ├── CST816Touch.h            Known-good v0.2.2 polling touch driver
-│   ├── RoundDisplay.h           Elecrow GC9A01 configuration
-│   ├── TouchGesture.h           Safe tap/swipe distinction
-│   ├── RotaryDecoder.h          Tested Gray-code decoder reference
-│   ├── VolumeScaler.h           Tested signed volume speed scaling
-│   ├── MediaLogic.h             Four hit zones and animated estimate
-│   ├── BuddyBrain.h             43 moods, random schedule, sleep/wake
-│   └── BuddyGraphics.h          Procedural GUI / face / particles
-├── tests/                       Host logic and website release checks
+├── src/main.cpp                  USB HID, encoder, touch and animation loop
+├── include/                     Drivers, gestures, configuration, graphics, moods
+├── scripts/build_pages.sh       Automatic Cloudflare Pages compiler and release builder
 ├── tools/
-│   ├── windows_cli.py           Windows build + flash + web-export helper
-│   └── export_web.py            ESP Web Tools factory/update image packaging
-├── web/                          Cloudflare Pages static website
-│   ├── index.html
-│   ├── assets/                   CSS/JS and original vector favicon
-│   └── firmware/                 Populated when you export real binaries
+│   ├── requirements-build.txt   Reproducible PlatformIO and esptool versions
+│   ├── export_web.py            ESP32-S3 factory/update image generator
+│   ├── verify_release.py        Checksums, manifests, binary safety checks
+│   └── windows_cli.py           Optional Windows developer build/flash helper
+├── tests/                       Host C++ tests and installer/release tests
+├── web/
+│   ├── index.html               Browser installer and project website
+│   └── assets/                  Static design and illustration
 ├── platformio.ini
 ├── partitions.csv
 ├── BUILD_WINDOWS.bat
 ├── FLASH_WINDOWS.bat
-├── EXPORT_WEB_WINDOWS.bat
+├── .gitignore
 ├── LICENSE
 └── README.md
 ```
 
-There are **no GitHub Actions**, no mandatory backend, no external animation assets and no runtime dependency on Wi-Fi or cloud services.
+## Tests
 
-## Testing and limitations
-
-Host C++ tests (requires C++17 compiler such as GCC/Clang):
+The automated Pages build stops if a test or compiler step fails. Developers can also run the dependency-free tests locally:
 
 ```bash
-g++ -std=c++17 -O2 -Wall -Wextra -Werror -Iinclude tests/host_tests.cpp -o /tmp/rotary-buddy-tests
-/tmp/rotary-buddy-tests
-python3 tests/test_web.py
+g++ -std=c++17 -O2 -Wall -Wextra -Werror -Iinclude tests/host_tests.cpp -o /tmp/rotary-host-tests
+/tmp/rotary-host-tests
+
+g++ -std=c++17 -O2 -Wall -Wextra -Werror -Itests/stubs -Iinclude tests/graphics_tests.cpp -o /tmp/rotary-graphics-tests
+/tmp/rotary-graphics-tests
+
+python3 -m unittest discover -s tests -p 'test_*.py' -v
 node --check web/assets/site.js
 ```
 
-These verify volume speed/direction, rotary Gray-code decoding, touch gestures, media zones, 0–100 clamping and animation smoothing, random moods, sleep/wake and website manifest offsets. Source-level C++ syntax was also checked using API stubs compatible with the prior firmware. **These checks are not equivalent to a real PlatformIO compilation or physical hardware test.** After flashing, verify touch, single swipe per page, encoder volume under heavy animation, wake/sleep, USB media keys and correct web installer offsets.
+Host tests exercise media touch areas, gestures, volume scaling, sleep/wake, all **85 renderable moods**, caption limits, random reactions, build-version consistency, safe flash offsets and checksum verification. They are not a substitute for full firmware compilation and a physical test on the target CrowPanel device. The actual hardware and Cloudflare Pages deployment must still be verified after the first online build.
 
-**Known limits:** The native HID stack cannot report actual system volume or track title. Rendered animations are procedurally drawn, not exported GIFs. USB must be connected for media control; Buddy animations still run if USB is providing power without a computer. Automatic host OS detection is not needed because only standard USB consumer media usages are emitted.
+## GitHub repository metadata
 
-## GitHub metadata
+**Repository:** `CrowPanel-Rotary-Buddy`  
+**Suggested description:** `An animated ESP32-S3 desktop buddy and USB media dial with 85 moods, 72 witty reactions and one-click browser flashing. Auto-built on Cloudflare Pages.`  
+**Website:** `https://crowpanel-rotary-buddy.lepczynski.it/`
 
-**Repository name:** `CrowPanel-Rotary-Buddy`
+**Topics:** `esp32-s3`, `crowpanel`, `elecrow`, `desktop-pet`, `desk-companion`, `usb-hid`, `media-controller`, `rotary-encoder`, `touchscreen`, `platformio`, `esp-web-tools`, `web-serial`, `cloudflare-pages`, `open-source`, `windows`, `macos`, `linux`
 
-**Description:** `An animated desktop companion and USB media dial for the CrowPanel ESP32-S3 rotary touchscreen. Two screens, expressive faces, browser flashing, no PC app.`
+## License and credits
 
-**Suggested topics:** `esp32-s3`, `elecrow`, `crowpanel`, `desktop-pet`, `desk-companion`, `rotary-encoder`, `usb-hid`, `media-controller`, `touchscreen`, `platformio`, `esp-web-tools`, `web-serial`, `windows`, `macos`, `linux`
+MIT licensed. An independent open-source electronics project by [Wojciech Lepczyński](https://lepczynski.it/).
 
-## Credits and license
+[Elecrow hardware information](https://www.elecrow.com/wiki/CrowPanel_1.28inch-HMI_ESP32_Rotary_Display.html) · [LovyanGFX](https://github.com/lovyan03/LovyanGFX) · [ESP Web Tools](https://github.com/esphome/esp-web-tools) · [Cloudflare Pages](https://developers.cloudflare.com/pages/)
 
-Made by [Wojciech Lepczyński](https://lepczynski.it/) as an independent open-source project. Inspired by the *idea* of expressive desk companions such as EMO and Eilik, but not affiliated with those products or their companies. Source code and original vector artwork are provided under the [MIT License](LICENSE). Uses the original public [Elecrow hardware documentation](https://www.elecrow.com/wiki/CrowPanel_1.28inch-HMI_ESP32_Rotary_Display.html), [LovyanGFX](https://github.com/lovyan03/LovyanGFX), and [ESP Web Tools](https://github.com/esphome/esp-web-tools), subject to their own licenses.
+The face, animation engine, jokes and artwork are original project content. External dependencies and hardware remain subject to their respective licenses and trademarks.
