@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#070f20">
+  <meta name="description" content="Build an animated desktop companion and USB media dial with the Elecrow CrowPanel 1.28-inch ESP32-S3 rotary display. Free, open source, offline, with browser firmware flashing.">
+  <meta property="og:title" content="CrowPanel Rotary Buddy | Desktop companion and media dial">
+  <meta property="og:description" content="One dial, two worlds. Expressive desktop pet and USB media controller. Flash your CrowPanel ESP32-S3 from your browser.">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://crowpanel-rotary-buddy.lepczynski.it/">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <title>CrowPanel Rotary Buddy | Browser firmware installer</title>
+  <link rel="stylesheet" href="./assets/site.css">
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <script defer src="./assets/site.js"></script>
+</head>
+<body>
+  <a href="#content" class="skip-link">Skip to content</a>
+  <header class="nav shell">
+    <a href="#top" class="brand" aria-label="CrowPanel Rotary Buddy home"><span class="brand-mark">◉</span><span>ROTARY <strong>BUDDY</strong></span></a>
+    <nav aria-label="Primary"><a href="#design">Design</a><a href="#reactions">Personality</a><a href="#install">Install</a><a href="https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav>
+  </header>
+  <main id="content">
+    <section class="hero shell" id="top">
+      <div class="hero-content">
+        <p class="eyebrow"><span class="live-dot"></span> OPEN SOURCE · ESP32-S3 · USB HID</p>
+        <h1>One dial.<br><span class="gradient">A little life.</span></h1>
+        <p class="intro">Meet Rotary Buddy. A premium-looking media controller when you need it, a playful animated companion when you don't. Built for the 1.28-inch Elecrow CrowPanel rotary touchscreen.</p>
+        <div class="hero-actions"><a class="btn primary" href="#install">Install firmware <span>↗</span></a><a class="btn secondary" href="https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy">Explore the code</a></div>
+        <div class="keyfacts"><span>Two swipeable screens</span><span>43 animation states</span><span>No desktop app</span></div>
+      </div>
+      <div class="hero-visual">
+        <div class="halo" aria-hidden="true"></div>
+        <div class="device-stage">
+          <img class="device-render" id="deviceProduct"
+               src="./assets/rotary-buddy-device.webp"
+               width="1040" height="1040" fetchpriority="high"
+               alt="Illustration of the round CrowPanel rotary display: silver knurled dial, black circular touch screen and smiling cyan Buddy face.">
+          <div class="preview-media" id="previewMedia" hidden aria-hidden="true">
+            <div class="preview-media-header"><small>ROTARY BUDDY</small><strong>MEDIA</strong></div>
+            <div class="preview-media-volume" aria-hidden="true"></div>
+            <div class="preview-media-buttons" aria-hidden="true">
+              <span class="media-prev">&#x23EE;</span>
+              <span class="media-play">&#x23EF;</span>
+              <span class="media-next">&#x23ED;</span>
+              <span class="media-mute">&#x1F507;</span>
+            </div>
+            <span class="preview-media-footer" aria-hidden="true"><i></i><i></i></span>
+          </div>
+        </div>
+        <div class="preview-switch" role="group" aria-label="Device preview screen"><button class="active" data-preview="buddy" type="button" aria-pressed="true">Buddy</button><button data-preview="media" type="button" aria-pressed="false">Media</button></div>
+        <div class="visual-caption">ILLUSTRATIVE PRODUCT RENDER &middot; INTERACTIVE SCREEN PREVIEW</div>
+      </div>
+    </section>
+    <section class="facts shell" aria-label="Project highlights"><span>240 × 240 IPS</span><span>Native USB media keys</span><span>Windows · macOS · Linux</span><span>MIT licensed</span></section>
+    <section class="section shell" id="design">
+      <div class="section-head"><p class="eyebrow">TWO WORLDS</p><h2>Useful by day.<br>Expressive all the time.</h2><p>No tiny menus or unnecessary shortcuts. Swipe to change modes, turn the ring for volume and press for play/pause on either screen.</p></div>
+      <div class="features">
+        <article class="feature"><span class="feature-number">01</span><div class="feature-icon">◉</div><h3>Premium media deck</h3><p>Big Previous, Play/Pause, Next and Mute buttons. Volume animates around the ring from 0 to 100% (estimated, not read from the PC). Skip tracks and watch the sparks fly.</p></article>
+        <article class="feature"><span class="feature-number">02</span><div class="feature-icon">◡</div><h3>Your desk buddy</h3><p>Dozens of hand-drawn expressions. Blinks, winks, shy faces, giggles, stars, daydreams, dances, yawns, floating bubbles, rainbow arcs and little surprises.</p></article>
+        <article class="feature"><span class="feature-number">03</span><div class="feature-icon">☾</div><h3>Gently drifts to sleep</h3><p>Media automatically becomes Buddy after 30 seconds without input. Buddy settles down and dreams after five minutes. Tap, twist or press to wake it up.</p></article>
+      </div>
+    </section>
+    <section class="section reactions shell" id="reactions">
+      <div><p class="eyebrow">A PERSONALITY, NOT A SLIDESHOW</p><h2>A different mood.<br>Whenever you look.</h2><p>A lightweight procedural animation engine creates original expressions directly on the ESP32-S3. Most idle moments are subtle. Larger reactions are deliberately less frequent, so it stays pleasant on your desk.</p><p>Tap the Buddy face to provoke a new expression. It works offline, without a microphone, cloud service or AI.</p></div>
+      <div class="reaction-grid" aria-label="Examples of animation moods"><span>✦ Sparkles</span><span>♡ Heart eyes</span><span>◡ Smile</span><span>✳ Party</span><span>☾ Dream</span><span>☄ Dizzy</span><span>◇ Surprise</span><span>◌ Bubbles</span><span>◠ Shy</span><span>♫ Singing</span><span>✧ Winking</span><span>⋆ Mischief</span></div>
+    </section>
+    <section class="section shell" id="install">
+      <div class="section-head"><p class="eyebrow">WEB FLASHER</p><h2>From browser<br>to desk companion.</h2><p>No Arduino IDE or extra desktop app. This project uses the same ESP Web Tools installation approach as my M5Stack Touch Control Deck, with separate update and factory images.</p></div>
+      <div class="instructions"><div><b>01</b><h3>Connect CrowPanel</h3><p>Use the included data-capable USB lead. Hold BOOT, tap RESET and release BOOT to enter ESP32-S3 download mode.</p></div><div><b>02</b><h3>Install with Chrome or Edge</h3><p>Choose the port and the firmware below. Web Serial requires HTTPS and a supported desktop browser.</p></div><div><b>03</b><h3>Enjoy your Buddy</h3><p>Press RESET after flashing. Your PC sees a standard USB multimedia device, no pairing or background software.</p></div></div>
+      <div class="flashers">
+        <article class="flash-card" data-installer="update"><p class="card-label">EXISTING DEVICE</p><h3>Update firmware</h3><p>Flash only the application at <code>0x10000</code>. It preserves the settings area ONLY if you do not choose "Erase device" in the ESP Web Tools dialog. Requires the same partition layout.</p><div class="installer-state" id="updateStatus" role="status">Checking published firmware...</div><div class="installer-button" id="updateButton" hidden><esp-web-install-button manifest="./firmware/manifest-update.json"><button type="button" slot="activate" class="btn primary">Update firmware ↗</button><span slot="unsupported">Use Chrome or Edge on a desktop computer.</span><span slot="not-allowed">HTTPS is required.</span></esp-web-install-button></div></article>
+        <article class="flash-card factory" data-installer="factory"><p class="card-label">NEW DEVICE / RESET</p><h3>Factory installation</h3><p>Writes the complete 16 MB flash layout, including bootloader and partition table. <strong>Clears previous device settings.</strong> Use this for the first install or intentional reset.</p><div class="installer-state" id="factoryStatus" role="status">Checking published firmware...</div><div class="installer-button" id="factoryButton" hidden><esp-web-install-button manifest="./firmware/manifest.json"><button type="button" slot="activate" class="btn secondary">Factory install ↗</button><span slot="unsupported">Use Chrome or Edge on a desktop computer.</span><span slot="not-allowed">HTTPS is required.</span></esp-web-install-button></div></article>
+      </div>
+      <p class="flash-note">The browser installer becomes available after a compiled and verified firmware binary is published in <code>web/firmware/</code>. If the build is not published yet, use the Windows build script from GitHub or see the README. This installer is intended <strong>only</strong> for the Elecrow 1.28-inch ESP32-S3 rotary display, not M5Stack hardware.</p>
+    </section>
+    <section class="end shell"><div><p class="eyebrow">MADE TO TINKER</p><h2>Make it yours.</h2><p>Adjust colors, moods, idle and sleep times, volume scaling and more in <code>include/Config.h</code> and the renderer. All graphics are original C++ primitives.</p></div><a class="btn primary" href="https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy">View project on GitHub ↗</a></section>
+  </main>
+  <footer class="footer shell"><span>CROWPANEL ROTARY BUDDY · OPEN SOURCE / MIT</span><span>Independent DIY project by Wojciech Lepczyński · <a href="https://lepczynski.it/">lepczynski.it</a></span></footer>
+</body>
+</html>

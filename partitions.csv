@@ -1,0 +1,5 @@
+# Simple 16 MB flash layout (one factory app, no OTA).
+# Name, Type, SubType, Offset, Size, Flags
+nvs,     data, nvs,     0x9000,   0x5000,
+app0,    app,  factory, 0x10000,  0x400000,
+spiffs,  data, spiffs,  0x410000, 0xbf0000,
