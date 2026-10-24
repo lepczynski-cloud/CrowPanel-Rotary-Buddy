@@ -55,6 +55,31 @@ class WebTests(unittest.TestCase):
         self.assertTrue((ROOT / 'web/assets/site.css').stat().st_size > 1000)
         self.assertTrue((ROOT / 'web/assets/site.js').stat().st_size > 200)
 
+    def test_site_navigation_and_related_projects(self):
+        html = (ROOT / 'web/index.html').read_text(encoding='utf-8')
+        self.assertNotIn('More than eyes.', html)
+        self.assertNotIn('id="reactions"', html)
+        self.assertNotIn('href="#reactions"', html)
+        self.assertIn('id="gallery"', html)
+        self.assertIn('href="#gallery"', html)
+        self.assertIn('id="projects"', html)
+        self.assertIn('href="#projects"', html)
+        self.assertIn('<div class="preview-buddy"', html)
+        self.assertIn('src="./assets/scenes/coffee.svg" width="240" height="240"', html)
+        for route in (
+            'https://m5stack-touch-control-deck.lepczynski.it/',
+            'https://sbtohtml.lepczynski.it/',
+            'https://asciicamera.lepczynski.it/',
+            'https://admintoolkit.lepczynski.it/',
+            'https://github.com/lepczynski-cloud/M5Stack-Touch-Control-Deck',
+            'https://github.com/lepczynski-cloud/sb-to-html-converter',
+            'https://github.com/lepczynski-cloud/ascii-camera-studio',
+            'https://github.com/lepczynski-cloud/admin-toolkit',
+            'https://lepczynski.it/',
+            'https://www.youtube.com/@WojciechLepczynski',
+        ):
+            self.assertIn(route, html)
+
     def test_round_device_illustration(self):
         # The website now uses a local, round product illustration rather than
         # unrelated stock imagery. No network resource is needed to render it.

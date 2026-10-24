@@ -22,7 +22,7 @@
   <a href="#content" class="skip-link">Skip to content</a>
   <header class="nav shell">
     <a href="#top" class="brand" aria-label="CrowPanel Rotary Buddy home"><span class="brand-mark">◉</span><span>ROTARY <strong>BUDDY</strong></span></a>
-    <nav aria-label="Primary"><a href="#design">Design</a><a href="#reactions">Personality</a><a href="#install">Install</a><a href="https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav>
+    <nav aria-label="Primary"><a href="#design">Design</a><a href="#gallery">Gallery</a><a href="#install">Install</a><a href="#projects">Projects</a><a href="https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav>
   </header>
   <main id="content">
     <section class="hero shell" id="top">
@@ -39,10 +39,10 @@
           <img class="device-render" id="deviceProduct"
                src="./assets/rotary-buddy-device.webp"
                width="1040" height="1040" fetchpriority="high"
-               alt="Illustration of the round CrowPanel rotary display: silver knurled dial, black circular touch screen and smiling cyan Buddy face.">
+               alt="Illustration of the round CrowPanel rotary display with a smiling Buddy, coffee mug and COFFEE FIRST message.">
           <div class="preview-buddy" id="previewBuddy" aria-hidden="true">
-            <img src="./assets/scenes/hello.svg" width="240" height="240"
-                 alt="Illustration of Buddy waving hello with a speech bubble on the round display.">
+            <img src="./assets/scenes/coffee.svg" width="240" height="240"
+                 alt="Illustration of Buddy on the circular CrowPanel display, holding a coffee mug and saying COFFEE FIRST.">
           </div>
           <div class="preview-media" id="previewMedia" hidden aria-hidden="true">
             <div class="preview-media-header"><small>ROTARY BUDDY</small><strong>MEDIA</strong></div>
@@ -69,15 +69,11 @@
         <article class="feature"><span class="feature-number">03</span><div class="feature-icon">☾</div><h3>Gently drifts to sleep</h3><p>Media automatically becomes Buddy after 30 seconds without input. Buddy settles down and dreams after five minutes. Tap, twist or press to wake it up.</p></article>
       </div>
     </section>
-    <section class="section reactions shell" id="reactions">
-      <div><p class="eyebrow">A PERSONALITY, NOT A SLIDESHOW</p><h2>More than eyes.<br>A little personality.</h2><p>A lightweight procedural animation engine creates original expressions directly on the ESP32-S3. Most idle moments are subtle. Larger reactions are deliberately less frequent, so it stays pleasant on your desk.</p><p>Pet Buddy with a downward swipe for an affectionate response, or tap for a surprise. Watch it wear hats, headphones or a crown and react to coffee, Wi-Fi and imaginary bugs. All captions are on-screen jokes, never computer commands.</p></div>
-      <div class="reaction-grid" aria-label="Examples of animation moods"><span>✦ Sparkles</span><span>♡ Heart eyes</span><span>◡ Smile</span><span>✳ Party</span><span>☾ Dream</span><span>☄ Dizzy</span><span>◇ Surprise</span><span>◌ Bubbles</span><span>◠ Shy</span><span>♫ Singing</span><span>✧ Winking</span><span>⋆ Mischief</span><span>☕ Coffee break</span><span>✓ CI passed</span><span>⚡ Deploy jokes</span><span>✳ Confetti</span></div>
-    </section>
-    <section class="gallery-section shell" aria-labelledby="galleryTitle">
+    <section class="gallery-section shell" id="gallery" aria-labelledby="galleryTitle">
       <div class="gallery-heading"><p class="eyebrow">MEET THE MOODS</p><h2 id="galleryTitle">Big expressions. Tiny screen.</h2><p>Clear speech bubbles, animated eyes, oversized props and fun outfits. These illustrations represent the firmware's visual style.</p></div>
       <div class="mood-gallery" aria-label="Illustrations of Rotary Buddy reactions">
-        <article class="mood-card"><img src="./assets/scenes/hello.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with a curious hello, displaying HELLO THERE!"><h3>HELLO THERE!</h3><p>A curious hello</p></article>
         <article class="mood-card"><img src="./assets/scenes/coffee.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with a much-needed break, displaying COFFEE FIRST"><h3>COFFEE FIRST</h3><p>A much-needed break</p></article>
+        <article class="mood-card"><img src="./assets/scenes/hello.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with a curious hello, displaying HELLO THERE!"><h3>HELLO THERE!</h3><p>A curious hello</p></article>
         <article class="mood-card"><img src="./assets/scenes/pet.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with stroke down to make buddy happy, displaying MORE PETS!"><h3>MORE PETS!</h3><p>Stroke down to make Buddy happy</p></article>
         <article class="mood-card"><img src="./assets/scenes/headphones.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with sometimes buddy brings the beat, displaying DJ BUDDY!"><h3>DJ BUDDY!</h3><p>Sometimes Buddy brings the beat</p></article>
         <article class="mood-card"><img src="./assets/scenes/dns.svg" width="240" height="240" loading="lazy" alt="Round Buddy face with investigating another mystery, displaying IS IT DNS?"><h3>IS IT DNS?</h3><p>Investigating another mystery</p></article>
@@ -94,6 +90,43 @@
         <article class="flash-card factory" data-installer="factory"><p class="card-label">NEW DEVICE / RESET</p><h3>Factory installation</h3><p>Flashes a merged bootloader, partition table and application image. Select <strong>Erase device</strong> in the installer if you want a clean reset of previous settings.</p><div class="installer-state" id="factoryStatus" role="status">Checking latest firmware...</div><div class="installer-button" id="factoryButton" hidden><esp-web-install-button manifest="./firmware/manifest.json"><button type="button" slot="activate" class="btn secondary">Factory install ↗</button><span slot="unsupported">Use Chrome or Edge on a desktop computer.</span><span slot="not-allowed">HTTPS is required.</span></esp-web-install-button></div></article>
       </div>
       <p class="flash-note">Firmware images are compiled automatically by Cloudflare Pages from the latest GitHub commit and verified before deployment. If a build fails, the current working release stays online. Designed <strong>only</strong> for the Elecrow 1.28-inch ESP32-S3 rotary display, not for M5Stack hardware.</p>
+    </section>
+    <section class="projects-section shell" id="projects" aria-labelledby="projectsTitle">
+      <div class="projects-heading">
+        <div><p class="eyebrow">MORE FROM MY WORKBENCH</p><h2 id="projectsTitle">More things I've built.</h2><p>Small tools, useful experiments and DIY hardware. Pick something interesting and explore the live project or its source code.</p></div>
+        <a class="projects-all-link" href="https://github.com/lepczynski-cloud" target="_blank" rel="noopener noreferrer">Explore all my GitHub projects <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="projects-grid">
+        <article class="project-card project-m5">
+          <div class="project-art" aria-hidden="true"><div class="m5-preview"><span class="m5-lamp"></span><div class="m5-buttons"><span>⏯</span><span>♪</span><span>⌘</span><span>↗</span></div></div><span class="art-note">TOUCH CONTROL</span></div>
+          <div class="project-content"><p class="project-kicker">ESP32 · USB CONTROL</p><h3>M5Stack Touch Control Deck</h3><p>A compact, customizable touch controller for everyday computer shortcuts and actions.</p>
+            <div class="project-links"><a class="project-visit" href="https://m5stack-touch-control-deck.lepczynski.it/" target="_blank" rel="noopener noreferrer">Explore project <span aria-hidden="true">↗</span></a><a class="project-source" href="https://github.com/lepczynski-cloud/M5Stack-Touch-Control-Deck" target="_blank" rel="noopener noreferrer">GitHub source <span aria-hidden="true">↗</span></a></div>
+          </div>
+        </article>
+        <article class="project-card project-scratch">
+          <div class="project-art" aria-hidden="true"><div class="convert-flow"><span class="source-file">.sb3<small>SCRATCH</small></span><span class="convert-arrow">→</span><span class="target-file">HTML<small>WEB APP</small></span></div><span class="art-note">PLAY WITHOUT THE EDITOR</span></div>
+          <div class="project-content"><p class="project-kicker">BROWSER TOOL · SCRATCH</p><h3>SB to HTML Converter</h3><p>Turn Scratch projects into standalone HTML files that can run without the Scratch editor.</p>
+            <div class="project-links"><a class="project-visit" href="https://sbtohtml.lepczynski.it/" target="_blank" rel="noopener noreferrer">Try converter <span aria-hidden="true">↗</span></a><a class="project-source" href="https://github.com/lepczynski-cloud/sb-to-html-converter" target="_blank" rel="noopener noreferrer">GitHub source <span aria-hidden="true">↗</span></a></div>
+          </div>
+        </article>
+        <article class="project-card project-ascii">
+          <div class="project-art" aria-hidden="true"><div class="ascii-window"><div class="ascii-title"><i></i><i></i><i></i><span>ASCII CAMERA</span></div><pre>..::########::..
+.:##@@....@@##:.
+:#@@..####..@@#:
+::##..####..##::
+..::########::..</pre></div><span class="art-note">TURN IMAGES INTO TEXT ART</span></div>
+          <div class="project-content"><p class="project-kicker">CREATIVE TOOL · LOCAL-FIRST</p><h3>ASCII Camera Studio</h3><p>Transform photos, video and your camera feed into ASCII art, right in your browser.</p>
+            <div class="project-links"><a class="project-visit" href="https://asciicamera.lepczynski.it/" target="_blank" rel="noopener noreferrer">Open studio <span aria-hidden="true">↗</span></a><a class="project-source" href="https://github.com/lepczynski-cloud/ascii-camera-studio" target="_blank" rel="noopener noreferrer">GitHub source <span aria-hidden="true">↗</span></a></div>
+          </div>
+        </article>
+        <article class="project-card project-admin">
+          <div class="project-art" aria-hidden="true"><div class="admin-window"><div class="admin-label">ONLINE ADMIN TOOLKIT</div><div class="admin-ip">192.168.1.0<span>/24</span></div><div class="admin-bar"><span>256 addresses</span><span>✓ CIDR</span></div><div class="admin-pills"><span>CRON</span><span>CHMOD</span><span>JSON</span></div></div><span class="art-note">PRACTICAL UTILITIES</span></div>
+          <div class="project-content"><p class="project-kicker">DEVOPS · BROWSER UTILITIES</p><h3>Online Admin Toolkit</h3><p>Handy calculators and converters for networks, Linux, automation and everyday DevOps work.</p>
+            <div class="project-links"><a class="project-visit" href="https://admintoolkit.lepczynski.it/" target="_blank" rel="noopener noreferrer">Explore tools <span aria-hidden="true">↗</span></a><a class="project-source" href="https://github.com/lepczynski-cloud/admin-toolkit" target="_blank" rel="noopener noreferrer">GitHub source <span aria-hidden="true">↗</span></a></div>
+          </div>
+        </article>
+      </div>
+      <div class="creator-links"><span>More experiments, videos and build notes:</span><a href="https://lepczynski.it/" target="_blank" rel="noopener noreferrer">Read the blog <span aria-hidden="true">↗</span></a><a href="https://www.youtube.com/@WojciechLepczynski" target="_blank" rel="noopener noreferrer">Watch on YouTube <span aria-hidden="true">↗</span></a></div>
     </section>
     <section class="end shell"><div><p class="eyebrow">MADE TO TINKER</p><h2>Make it yours.</h2><p>Adjust colors, moods, idle and sleep times, volume scaling and more in <code>include/Config.h</code> and the renderer. All graphics are original C++ primitives.</p></div><a class="btn primary" href="https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy">View project on GitHub ↗</a></section>
   </main>
