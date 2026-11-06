@@ -64,8 +64,10 @@ class WebTests(unittest.TestCase):
         self.assertIn('href="#gallery"', html)
         self.assertIn('id="projects"', html)
         self.assertIn('href="#projects"', html)
-        self.assertIn('<div class="preview-buddy"', html)
+        self.assertIn('id="previewBuddy"', html)
+        self.assertIn('id="previewMedia"', html)
         self.assertIn('src="./assets/scenes/coffee.svg" width="240" height="240"', html)
+        self.assertIn('REAL HARDWARE, REAL SCREEN', html)
         for route in (
             'https://m5stack-touch-control-deck.lepczynski.it/',
             'https://sbtohtml.lepczynski.it/',
@@ -80,29 +82,32 @@ class WebTests(unittest.TestCase):
         ):
             self.assertIn(route, html)
 
-    def test_round_device_illustration(self):
-        # The website now uses a local, round product illustration rather than
-        # unrelated stock imagery. No network resource is needed to render it.
-        asset = ROOT / 'web/assets/rotary-buddy-device.webp'
-        data = asset.read_bytes()
-        self.assertGreater(len(data), 20000)
-        self.assertEqual(data[:4], b'RIFF')
-        self.assertEqual(data[8:12], b'WEBP')
+    def test_real_product_photos_and_separate_ui_preview(self):
+        # The two user-provided photos are self-hosted optimized WebPs, and
+        # illustrative UI previews are intentionally labelled as such.
         html = (ROOT / 'web/index.html').read_text(encoding='utf-8')
         script = (ROOT / 'web/assets/site.js').read_text(encoding='utf-8')
-        self.assertIn('id="deviceProduct"', html)
+        readme = (ROOT / 'README.md').read_text(encoding='utf-8')
+        for name in ('rotary-buddy-real.webp', 'rotary-buddy-dns.webp'):
+            asset = ROOT / 'web/assets' / name
+            data = asset.read_bytes()
+            self.assertGreater(len(data), 12000)
+            self.assertEqual(data[:4], b'RIFF')
+            self.assertEqual(data[8:12], b'WEBP')
+            self.assertIn(name, html)
+            self.assertIn(name, readme)
         self.assertIn('id="previewMedia"', html)
-        self.assertIn('rotary-buddy-device.webp', html)
-        self.assertIn("document.getElementById('previewMedia').hidden", script)
-        self.assertIn('previewBuddy', script)
         self.assertIn('id="previewBuddy"', html)
+        self.assertIn('UI PREVIEW', html)
+        self.assertIn("document.getElementById('previewMedia').hidden", script)
         self.assertIn("document.getElementById('previewBuddy').hidden", script)
+        self.assertNotIn('rotary-buddy-device.webp', html)
 
     def test_gallery_faces_are_valid_local_svg(self):
         from xml.etree import ElementTree as ET
         folder = ROOT / 'web/assets/scenes'
         scenes = sorted(folder.glob('*.svg'))
-        self.assertEqual(len(scenes), 8)
+        self.assertEqual(len(scenes), 10)
         html = (ROOT / 'web/index.html').read_text(encoding='utf-8')
         for svg in scenes:
             root = ET.fromstring(svg.read_text(encoding='utf-8'))
@@ -111,6 +116,65 @@ class WebTests(unittest.TestCase):
             self.assertIn('assets/scenes/' + svg.name, html)
         self.assertIn('mood-gallery', html)
         self.assertIn('SWIPE', html.upper())
+
+    def test_real_project_images_and_safe_fallback(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('fetch_project_images', ROOT / 'scripts/fetch_project_images.py')
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules['fetch_project_images'] = mod
+        spec.loader.exec_module(mod)
+        self.assertEqual(len(mod.SOURCES), 4)
+        self.assertEqual(
+            mod.choose_image([
+                {'type': 'blob', 'path': 'images/logo.svg'},
+                {'type': 'blob', 'path': 'images/device-final-photo.jpg'},
+            ], mod.SOURCES[0]), 'images/device-final-photo.jpg')
+        self.assertEqual(
+            mod.choose_image([
+                {'type': 'blob', 'path': 'assets/readme/converter-screenshot.png'},
+            ], mod.SOURCES[1]), 'assets/readme/converter-screenshot.png')
+        self.assertEqual(
+            mod.choose_image([
+                {'type': 'blob', 'path': 'public/assets/demo/sample-ai-color-burst-ascii.png'},
+            ], mod.SOURCES[2]), 'public/assets/demo/sample-ai-color-burst-ascii.png')
+        self.assertIsNone(mod.choose_image([
+            {'type': 'blob', 'path': 'public/assets/icons/icon-512.png'},
+        ], mod.SOURCES[3]))
+        from PIL import Image
+        from io import BytesIO
+        bio = BytesIO()
+        Image.new('RGB', (1300, 650), '#18405a').save(bio, format='PNG')
+        with tempfile.TemporaryDirectory() as dirname:
+            output = Path(dirname) / 'm5.webp'
+            size = mod.convert_to_webp(bio.getvalue(), output)
+            self.assertTrue(output.read_bytes().startswith(b'RIFF'))
+            self.assertEqual(size, (1200, 600))
+        html = (ROOT / 'web/index.html').read_text(encoding='utf-8')
+        self.assertEqual(html.count('data-project-image'), 4)
+        for key in ('m5', 'scratch', 'ascii', 'admin'):
+            self.assertIn(f'./assets/projects/{key}.webp', html)
+        css = (ROOT / 'web/assets/site.css').read_text(encoding='utf-8')
+        js = (ROOT / 'web/assets/site.js').read_text(encoding='utf-8')
+        self.assertIn('.project-image.is-loaded', css)
+        self.assertIn("picture.addEventListener('load'", js)
+        self.assertIn('web/assets/projects/', (ROOT / '.gitignore').read_text())
+        runner = (ROOT / 'scripts/build_pages.sh').read_text()
+        self.assertIn('python scripts/fetch_project_images.py', runner)
+        self.assertGreater(runner.index('python scripts/fetch_project_images.py'), runner.index('python tools/verify_release.py'))
+
+    def test_media_layout_labels_below_icons_and_clean_background(self):
+        graphics = (ROOT / 'include/BuddyGraphics.h').read_text(encoding='utf-8')
+        self.assertIn('text(g, "MEDIA", 120, 34, 4, WHITE)', graphics)
+        self.assertIn('text(g, "R O T A R Y   B U D D Y", 120, 63, 1, MUTED)', graphics)
+        self.assertIn('text(g, "PREV", 47, 165, 1, MUTED)', graphics)
+        self.assertIn('text(g, "NEXT", 193, 165, 1, MUTED)', graphics)
+        self.assertIn('text(g, mutedLocally ? "MUTED" : "SOUND ON", 120, 219', graphics)
+        self.assertNotIn('g.fillCircle(28, 178, 1, GOLD)', graphics)
+        self.assertNotIn('g.fillCircle(205, 57, 1, VIOLET)', graphics)
+        html = (ROOT / 'web/index.html').read_text(encoding='utf-8')
+        self.assertIn('readme-media.webp', html)
+        self.assertIn('data-preview="media"', html)
+        self.assertIn('data-preview="buddy"', html)
 
     def test_exporter_fails_closed_on_missing_binary(self):
         with self.assertRaises(ValueError):
@@ -160,7 +224,7 @@ class WebTests(unittest.TestCase):
             self.assertTrue((output / 'SHA256SUMS.txt').is_file())
             self.assertEqual(len((output / 'SHA256SUMS.txt').read_text().splitlines()), 2)
             self.assertTrue(json.loads((output / 'manifest.json').read_text()))
-            self.assertEqual(verify(output), '1.1.0+gabc1234')
+            self.assertEqual(verify(output), RELEASE_VERSION + '+gabc1234')
             with (output / 'rotary-buddy.update.bin').open('ab') as stream:
                 stream.write(b'wrong')
             with self.assertRaisesRegex(ValueError, 'Checksums'):
@@ -182,9 +246,11 @@ class WebTests(unittest.TestCase):
     def test_site_describes_automatic_installer(self):
         html = (ROOT / 'web/index.html').read_text(encoding='utf-8')
         js = (ROOT / 'web/assets/site.js').read_text(encoding='utf-8')
-        self.assertIn('107 animated moods', html)
-        self.assertIn('108 witty captions', html)
+        self.assertIn('113 animated moods', html)
+        self.assertIn('135 witty captions', html)
         self.assertIn('Cloudflare automatically builds', html)
+        self.assertNotIn("method: 'HEAD'", js)
+        self.assertFalse(list((ROOT / '.github/workflows').glob('*.yml')))
         self.assertNotIn('not published yet', html + js)
         self.assertNotIn('EXPORT_WEB_WINDOWS.bat', html + js)
 

@@ -1,3 +1,5 @@
 # Pinned build dependencies. Cloudflare installs these automatically on each push.
 platformio==6.1.18
-esptool==4.8.1
+esptool==4.9.0
+# Optimize actual screenshots from the linked project repositories as WebP.
+Pillow==11.3.0

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Buddy carefully reviewing an AI answer">
+<defs><radialGradient id="bg" cx="50%" cy="37%" r="78%"><stop stop-color="#19384e"/><stop offset=".7" stop-color="#06101f"/><stop offset="1" stop-color="#020711"/></radialGradient></defs>
+<circle cx="120" cy="120" r="118" fill="url(#bg)" stroke="#25566a" stroke-width="2"/>
+<circle cx="120" cy="119" r="103" fill="none" stroke="#246075" stroke-dasharray="94 18 26 31"/>
+<circle cx="120" cy="117" r="77" fill="#09253b" stroke="#315c72" stroke-width="2"/>
+<path d="M68 104 Q75 88 91 91 M147 93 Q161 87 171 103" stroke="#b8a4ff" stroke-width="4" stroke-linecap="round" fill="none"/>
+<rect x="70" y="107" width="30" height="33" rx="14" fill="#a1a7fa"/><rect x="141" y="107" width="30" height="33" rx="14" fill="#a1a7fa"/>
+<circle cx="80" cy="116" r="4" fill="#ffffff"/><circle cx="150" cy="116" r="4" fill="#ffffff"/>
+<path d="M98 149 Q120 164 143 149" stroke="#79f4e4" stroke-width="5" fill="none" stroke-linecap="round"/>
+<circle cx="185" cy="73" r="16" stroke="#f6ca82" stroke-width="3" fill="#142c42"/>
+<path d="M178 71 L183 76 L192 65" stroke="#83f5e7" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="32" y="170" width="176" height="43" rx="14" fill="#152f45" stroke="#a8a5ff" stroke-width="2"/>
+<text x="120" y="195" fill="#eafaff" font-family="system-ui,sans-serif" text-anchor="middle" font-weight="800" font-size="12.8">VERIFY THE OUTPUT</text>
+<circle cx="120" cy="226" r="4" fill="#a8a5ff"/>
+</svg>

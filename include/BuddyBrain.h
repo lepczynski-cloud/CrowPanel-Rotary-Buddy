@@ -22,6 +22,7 @@ enum class Mood : uint8_t {
     Cap, Beanie, TopHat, WizardHat, Headphones, Crown, PartyHat,
     SleepCap, Sunglasses, Whistle, HelloWave, PeekScreen, Bashful,
     Alien, SideShuffle, Wifi,
+    Prompting, CodeReview, OnCall, PacketLoss, ShipIt, CloudOps,
     Count
 };
 
@@ -47,7 +48,8 @@ inline const char *moodName(Mood mood) {
         "Pet bliss", "Purr", "Nuzzle", "Head tilt", "Happy dance", "Curious",
         "Cap", "Beanie", "Top hat", "Wizard hat", "Headphones", "Crown",
         "Party hat", "Sleep cap", "Sunglasses", "Whistle", "Hello wave",
-        "Peek screen", "Bashful", "Alien", "Side shuffle", "Wi-Fi"
+        "Peek screen", "Bashful", "Alien", "Side shuffle", "Wi-Fi",
+        "AI prompting", "Code review", "On call", "Packet loss", "Ship it", "Cloud ops"
     };
     constexpr unsigned n = sizeof(names) / sizeof(names[0]);
     static_assert(n == BUDDY_MOOD_COUNT, "Mood descriptions must match the enum");
@@ -116,7 +118,24 @@ static constexpr BuddyQuip BUDDY_QUIPS[] = {
     {Mood::SideShuffle, "JUST VIBING!"}, {Mood::Nuzzle, "A LITTLE CUDDLE?"},
     {Mood::PetBliss, "MORE PETS!"}, {Mood::Purr, "PURRR..."},
     {Mood::Coffee, "BREWING IDEAS"}, {Mood::Coffee, "COFFEE.EXE"},
-    {Mood::Debug, "IT'S ALWAYS DNS"}, {Mood::Weekend, "NO MEETINGS!"}
+    {Mood::Debug, "IT'S ALWAYS DNS"}, {Mood::Weekend, "NO MEETINGS!"},
+    // Engineering humour only: Buddy has no AI model, internet connection,
+    // production credentials, remote execution or pager integration.
+    {Mood::Prompting, "ASK THE MODEL"}, {Mood::Prompting, "VERIFY THE OUTPUT"},
+    {Mood::Prompting, "HUMAN IN THE LOOP"}, {Mood::Prompting, "TOKEN BUDGET?"},
+    {Mood::Prompting, "PROMPT. TEST. REPEAT."},
+    {Mood::CodeReview, "CHECK THE DIFF"}, {Mood::CodeReview, "LGTM... MAYBE"},
+    {Mood::CodeReview, "REVIEW BEFORE MERGE"}, {Mood::CodeReview, "ONE MORE COMMENT"},
+    {Mood::CodeReview, "DID YOU TEST IT?"},
+    {Mood::OnCall, "PAGER AGAIN?"}, {Mood::OnCall, "3 AM ALERT!"},
+    {Mood::OnCall, "ON-CALL MODE"}, {Mood::OnCall, "PLEASE BE GREEN"},
+    {Mood::OnCall, "NO NEW ALERTS?"},
+    {Mood::PacketLoss, "PACKET LOST!"}, {Mood::PacketLoss, "RETRYING..."},
+    {Mood::PacketLoss, "WHERE'S MY PACKET?"}, {Mood::PacketLoss, "NETWORK GREMLINS"},
+    {Mood::ShipIt, "SHIP IT SAFELY"}, {Mood::ShipIt, "ROLLBACK READY?"},
+    {Mood::ShipIt, "GREEN PIPELINE!"}, {Mood::ShipIt, "CANARY FIRST"},
+    {Mood::CloudOps, "CHECK THE METRICS"}, {Mood::CloudOps, "CLOUD BILL AGAIN"},
+    {Mood::CloudOps, "COSTS ARE REAL"}, {Mood::CloudOps, "SCALE DOWN?"}
 };
 
 constexpr unsigned BUDDY_QUIP_COUNT = sizeof(BUDDY_QUIPS) / sizeof(BUDDY_QUIPS[0]);
@@ -133,6 +152,7 @@ public:
         activeUntil_ = now + 1400;
         nextIdleAt_ = now + 8000;
         sleeping_ = false;
+        previousQuipIndex_ = 0xffffu;
     }
 
     void activity(uint32_t now, bool playful = false) {
@@ -143,7 +163,7 @@ public:
             play(Mood::Wake, now, 1600, "I'M AWAKE!");
         } else if (playful) {
             if (random(100) < 55) {
-                const BuddyQuip &quip = BUDDY_QUIPS[random(BUDDY_QUIP_COUNT)];
+                const BuddyQuip &quip = nextQuip();
                 play(quip.mood, now, 1900 + random(1150), quip.line);
             } else {
                 static constexpr Mood reactions[] = {
@@ -155,7 +175,8 @@ public:
                     Mood::Confetti, Mood::Rocket, Mood::Wave, Mood::Glitch,
                     Mood::Fireworks, Mood::Zoomies, Mood::Wiggle, Mood::Boop,
                     Mood::Curious, Mood::HelloWave, Mood::HeadTilt, Mood::PetBliss,
-                    Mood::Crown, Mood::TopHat, Mood::Beanie, Mood::Headphones
+                    Mood::Crown, Mood::TopHat, Mood::Beanie, Mood::Headphones,
+                    Mood::Prompting, Mood::CodeReview, Mood::ShipIt
                 };
                 constexpr uint32_t count = sizeof(reactions) / sizeof(reactions[0]);
                 const Mood next = reactions[random(count)];
@@ -207,7 +228,8 @@ public:
                 Mood::LookUp, Mood::LookDown, Mood::WinkLeft, Mood::WinkRight,
                 Mood::SideEye, Mood::Thinking, Mood::RollEyes, Mood::Peek,
                 Mood::Squint, Mood::Glance, Mood::Wiggle, Mood::Stretch,
-                Mood::Ping, Mood::Typing, Mood::Freeze, Mood::CloudFloat
+                Mood::Ping, Mood::Typing, Mood::Freeze, Mood::CloudFloat,
+                Mood::CodeReview, Mood::OnCall
             };
             static constexpr Mood expressive[] = {
                 Mood::Happy, Mood::Laugh, Mood::Blush, Mood::Hearts,
@@ -232,7 +254,8 @@ public:
                 Mood::TopHat, Mood::WizardHat, Mood::Headphones, Mood::Crown,
                 Mood::PartyHat, Mood::SleepCap, Mood::Sunglasses, Mood::Whistle,
                 Mood::HelloWave, Mood::PeekScreen, Mood::Bashful, Mood::Alien,
-                Mood::SideShuffle, Mood::Wifi
+                Mood::SideShuffle, Mood::Wifi, Mood::Prompting,
+                Mood::PacketLoss, Mood::ShipIt, Mood::CloudOps
             };
             const uint32_t roll = random(100);
             if (roll < 70) {
@@ -242,7 +265,7 @@ public:
                 const Mood next = expressive[random(sizeof(expressive) / sizeof(expressive[0]))];
                 play(next == previous_ ? Mood::Blink : next, now, 1400 + random(1050));
             } else {
-                const BuddyQuip &quip = BUDDY_QUIPS[random(BUDDY_QUIP_COUNT)];
+                const BuddyQuip &quip = nextQuip();
                 play(quip.mood, now, 2050 + random(950), quip.line);
             }
             previous_ = current_;
@@ -266,6 +289,18 @@ private:
     Mood previous_ = Mood::Neutral;
     const char *activeQuip_ = nullptr;
     bool sleeping_ = false;
+    uint16_t previousQuipIndex_ = 0xffffu;
+
+    // Uniform selection excluding the immediately previous caption.
+    // Prevents a distracting duplicate when repeatedly tapping Buddy.
+    const BuddyQuip &nextQuip() {
+        const unsigned count = BUDDY_QUIP_COUNT;
+        if (count <= 1) return BUDDY_QUIPS[0];
+        unsigned pick = random(previousQuipIndex_ < count ? count - 1 : count);
+        if (previousQuipIndex_ < count && pick >= previousQuipIndex_) ++pick;
+        previousQuipIndex_ = static_cast<uint16_t>(pick);
+        return BUDDY_QUIPS[pick];
+    }
 
     uint32_t random(uint32_t maxExclusive) {
         if (!maxExclusive) return 0;

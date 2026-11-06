@@ -90,13 +90,8 @@ void base(G &g, uint32_t now) {
     g.drawCircle(120, 120, 119, EDGE);
     g.drawCircle(120, 120, 116, PANEL);
     g.drawCircle(120, 120, 113, EDGE);
-    const float step = static_cast<float>(now % 5000) * 0.0010f;
-    const int x = 120 + ix(107 * cosf(step));
-    const int y = 120 + ix(107 * sinf(step));
-    g.fillCircle(x, y, 2, CYAN);
-    g.fillCircle(38, 45, 1, SKY);
-    g.fillCircle(205, 57, 1, VIOLET);
-    g.fillCircle(28, 178, 1, GOLD);
+    // Clean, uncluttered glass: no stray yellow, pink or cyan background dots.
+    (void)now;
 }
 
 template <typename G>
@@ -166,30 +161,31 @@ template <typename G>
 void media(G &g, uint32_t now, int volumePct, bool showVolume,
            int feedbackKind, uint32_t feedbackElapsed, bool usbConnected, bool mutedLocally) {
     base(g, now);
-    text(g, "R O T A R Y   B U D D Y", 120, 28, 1, MUTED);
-    text(g, "MEDIA", 120, 51, 4, WHITE);
-    g.fillCircle(197, 46, 3, usbConnected ? GREEN : ROSE);
+    // Main title first, smaller brand beneath it. Keep both clear of buttons.
+    text(g, "MEDIA", 120, 34, 4, WHITE);
+    text(g, "R O T A R Y   B U D D Y", 120, 63, 1, MUTED);
+    g.fillCircle(194, 45, 3, usbConnected ? GREEN : ROSE);
     drawVolumeRing(g, volumePct, now, showVolume);
     if (showVolume) {
         g.fillCircle(120, 119, 83, BG);
         g.drawCircle(120, 119, 83, PANEL);
         char label[12];
         snprintf(label, sizeof(label), "%d%%", volumePct);
-        text(g, "VOLUME", 120, 83, 2, MUTED);
+        text(g, "VOLUME", 120, 91, 2, MUTED);
         text(g, label, 120, 126, 4, WHITE, 2);
         text(g, "ESTIMATED", 120, 165, 1, SKY);
     } else {
         const int locations[4][2] = {{47, 119}, {120, 119}, {193, 119}, {120, 188}};
         for (int i = 0; i < 4; ++i) {
-            const int radius = i == 1 ? 37 : (i == 3 ? 30 : 31);
+            const int radius = i == 1 ? 37 : (i == 3 ? 24 : 31);
             const uint16_t fill = i == 1 ? CYAN : PANEL;
             g.fillCircle(locations[i][0], locations[i][1], radius, fill);
             g.drawCircle(locations[i][0], locations[i][1], radius, i == 1 ? SKY : DIM);
             mediaGlyph(g, i, locations[i][0], locations[i][1], i == 1 ? BG : WHITE, mutedLocally);
         }
-        text(g, "PREV", 47, 83, 1, MUTED);
-        text(g, "NEXT", 193, 83, 1, MUTED);
-        text(g, mutedLocally ? "MUTED" : "SOUND ON", 120, 208, 1, mutedLocally ? ROSE : SKY);
+        text(g, "PREV", 47, 165, 1, MUTED);
+        text(g, "NEXT", 193, 165, 1, MUTED);
+        text(g, mutedLocally ? "MUTED" : "SOUND ON", 120, 219, 1, mutedLocally ? ROSE : SKY);
     }
     if (feedbackKind == 1 || feedbackKind == 2) {
         skipParticles(g, feedbackElapsed, feedbackKind == 1 ? -1 : 1);
@@ -203,7 +199,7 @@ void media(G &g, uint32_t now, int volumePct, bool showVolume,
             spark(g, 120 + ix(cosf(a) * 53), 184 + ix(sinf(a) * 25), 3, ROSE);
         }
     }
-    pageDots(g, 0);
+    // No page indicator on Media: the bottom is reserved for Mute state.
 }
 
 // Eye style and expression calculation are intentionally data-driven so a
@@ -328,6 +324,27 @@ inline Face faceFor(Mood mood, uint32_t elapsed, uint32_t now) {
         case Mood::Alien: f.eyeColor = GREEN; f.eyeWidth = 38; f.eyeHeight = 42; f.mouth = 2; break;
         case Mood::SideShuffle: f.tilt = ix(wave(now, .022f) * 11); f.mouth = 1; break;
         case Mood::Wifi: f.eyeColor = SKY; f.eyeStyle = 2; f.mouth = 1; break;
+        case Mood::Prompting: // rotating thought / checking the answer
+            f.eyeColor = VIOLET; f.eyebrow = 1;
+            f.gazeX = ix(7 * cosf(elapsed * .006f));
+            f.gazeY = -5 + ix(3 * sinf(elapsed * .006f));
+            f.mouth = 1; break;
+        case Mood::CodeReview: // suspicious, careful squint
+            f.eyeHeight = 18 + ix(3 * wave(now, .005f));
+            f.eyebrow = -1; f.gazeX = -5; f.mouth = 3; break;
+        case Mood::OnCall: // drowsy but alert
+            f.eyeHeight = 14 + ix(fabsf(wave(now, .003f)) * 10);
+            f.gazeY = 5; f.mouth = 2; f.eyeColor = SKY; break;
+        case Mood::PacketLoss: // confused zig-zag glance
+            f.eyeStyle = elapsed % 800 < 250 ? 5 : 0;
+            f.eyeColor = ROSE; f.gazeX = elapsed % 360 < 180 ? -11 : 11;
+            f.mouth = 3; break;
+        case Mood::ShipIt: // celebratory release
+            f.eyeStyle = 4; f.eyeColor = GREEN; f.mouth = 4;
+            f.tilt = ix(wave(now, .014f) * 5); break;
+        case Mood::CloudOps: // looking toward the clouds
+            f.eyeColor = SKY; f.gazeY = -8; f.eyeStyle = 2;
+            f.mouth = 1; f.tilt = ix(wave(now, .004f) * 4); break;
         case Mood::Wake: f.eyeStyle = elapsed < 350 ? 1 : 0; f.mouth = 1; f.eyeHeight = elapsed < 300 ? 9 : 33; break;
         case Mood::Sleep: f.eyeStyle = 1; f.mouth = 0; break;
         case Mood::Dream: f.eyeStyle = 1; f.mouth = 1; break;
@@ -570,6 +587,7 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
             }
             break;
         case Mood::Thinking:
+        case Mood::Prompting:
         case Mood::Idea:
             g.drawCircle(192, 78, 7, SKY);
             g.drawCircle(201, 64, 11, SKY);
@@ -633,6 +651,7 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
             }
             break;
         case Mood::Victory:
+        case Mood::ShipIt:
         case Mood::Confetti:
         case Mood::Fireworks:
             for (int i = 0; i < 14; ++i) {
@@ -666,6 +685,7 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
             }
             break;
         case Mood::CloudFloat:
+        case Mood::CloudOps:
             for (int i = 0; i < 3; ++i) {
                 const int x = 33 + i * 74 + ix(wave(now, .002f, i) * 8);
                 g.drawCircle(x, 61 + i % 2 * 18, 7 + i % 2 * 3, SKY);
@@ -692,6 +712,7 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
             arc(g, 120, 120, 94, 220, 310 + 45 * wave(now, .005f), SKY, 2);
             break;
         case Mood::Glitch:
+        case Mood::PacketLoss:
             for (int i = 0; i < 4; ++i) {
                 const int y = 67 + i * 33 + ix(wave(now, .023f, i) * 4);
                 g.drawLine(32, y, 48 + i * 12, y, i % 2 ? VIOLET : ROSE);
@@ -709,6 +730,7 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
             }
             break;
         case Mood::BugHunt:
+        case Mood::CodeReview:
         case Mood::Debug:
         case Mood::Coffee:
         case Mood::Snack:
@@ -740,6 +762,7 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
             break;
         case Mood::Sleep:
         case Mood::Sleepy:
+        case Mood::OnCall:
         case Mood::Dream:
         case Mood::SleepTalk:
             text(g, "z", 202, 73 - ix((now % 3100) / 90), 4, SKY);

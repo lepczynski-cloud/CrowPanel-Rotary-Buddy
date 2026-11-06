@@ -11,8 +11,8 @@
 #include "VolumeScaler.h"
 
 int main() {
-    static_assert(BUDDY_MOOD_COUNT == 107, "Unexpected number of animation states");
-    static_assert(BUDDY_QUIP_COUNT == 108, "Unexpected number of joke captions");
+    static_assert(BUDDY_MOOD_COUNT == 113, "Unexpected number of animation states");
+    static_assert(BUDDY_QUIP_COUNT == 135, "Unexpected number of joke captions");
     assert(std::string(moodName(Mood::Neutral)) == "Neutral");
     assert(std::string(moodName(Mood::Dream)) == "Dream");
     assert(std::string(moodName(Mood::Count)) == "Unknown");
@@ -149,6 +149,20 @@ int main() {
         if (playful.quip()) ++captions;
     }
     assert(captions > 700);
+    // The newly added scheduler must not repeat the previous random caption.
+    BuddyBrain noRepeat(0x567abcdu);
+    noRepeat.begin(0);
+    const char *lastCaption = nullptr;
+    unsigned verifiedCaptions = 0;
+    for (uint32_t i = 1; i <= 3500; ++i) {
+        noRepeat.activity(i * 50, true);
+        if (const char *caption = noRepeat.quip()) {
+            if (lastCaption) assert(std::strcmp(lastCaption, caption) != 0);
+            lastCaption = caption;
+            ++verifiedCaptions;
+        }
+    }
+    assert(verifiedCaptions > 1400);
     // A sleeping buddy sometimes sleep-talks, and touch wakes it reliably.
     BuddyBrain sleeper(0x913a);
     sleeper.begin(0);

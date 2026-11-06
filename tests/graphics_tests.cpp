@@ -25,8 +25,8 @@ struct MockScreen {
     template <typename... Args> void setTextSize(Args...) { ++operations; }
 };
 int main() {
-    static_assert(BUDDY_MOOD_COUNT == 107, "Track the public animation count");
-    static_assert(BUDDY_QUIP_COUNT == 108, "Track the public quip count");
+    static_assert(BUDDY_MOOD_COUNT == 113, "Track the public animation count");
+    static_assert(BUDDY_QUIP_COUNT == 135, "Track the public quip count");
     MockScreen g;
     for (unsigned i = 0; i < BUDDY_MOOD_COUNT; ++i) {
         const auto m = static_cast<Mood>(i);

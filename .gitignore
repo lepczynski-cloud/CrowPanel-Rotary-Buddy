@@ -10,3 +10,6 @@ __pycache__/
 web/firmware/
 
 # Firmware and site source stay in Git; binaries are built from each commit.
+
+# Real project media is downloaded by the Cloudflare Pages build
+web/assets/projects/

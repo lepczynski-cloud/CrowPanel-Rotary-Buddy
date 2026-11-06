@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Buddy reviewing a code diff">
+<defs><radialGradient id="bg" cx="50%" cy="37%" r="78%"><stop stop-color="#19384e"/><stop offset=".7" stop-color="#06101f"/><stop offset="1" stop-color="#020711"/></radialGradient></defs>
+<circle cx="120" cy="120" r="118" fill="url(#bg)" stroke="#25566a" stroke-width="2"/>
+<circle cx="120" cy="119" r="103" fill="none" stroke="#246075" stroke-dasharray="94 18 26 31"/>
+<circle cx="120" cy="117" r="77" fill="#09253b" stroke="#315c72" stroke-width="2"/>
+<path d="M66 102 L100 106 M143 106 L174 102" stroke="#f2cf86" stroke-width="4" stroke-linecap="round"/>
+<rect x="72" y="112" width="28" height="21" rx="8" fill="#7ce4e4"/><rect x="144" y="112" width="28" height="21" rx="8" fill="#7ce4e4"/>
+<path d="M100 148 Q120 141 140 148" stroke="#d7a3ff" stroke-width="5" fill="none" stroke-linecap="round"/>
+<rect x="180" y="58" width="31" height="35" rx="5" fill="#173d4e" stroke="#f3ca7c" stroke-width="2"/>
+<path d="M186 69 L191 74 L199 64 M185 81 H204" stroke="#78f9e8" stroke-width="3" fill="none"/>
+<rect x="32" y="170" width="176" height="43" rx="14" fill="#152f45" stroke="#f1cc81" stroke-width="2"/>
+<text x="120" y="195" fill="#eafaff" font-family="system-ui,sans-serif" text-anchor="middle" font-weight="800" font-size="14">CHECK THE DIFF</text>
+<circle cx="120" cy="226" r="4" fill="#f1cc81"/>
+</svg>
