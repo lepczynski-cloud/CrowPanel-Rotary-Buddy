@@ -98,6 +98,13 @@ class WebTests(unittest.TestCase):
             self.assertIn(name, readme)
         self.assertIn('id="previewMedia"', html)
         self.assertIn('id="previewBuddy"', html)
+        hero = html.split('<div class="hero-visual"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('class="hero-photo photo-media"', hero)
+        self.assertIn('src="./assets/readme-media.webp"', hero)
+        self.assertIn('MEDIA MODE', hero)
+        self.assertIn('UI PREVIEW', hero)
+        self.assertIn('rotary-buddy-real.webp', hero)
+        self.assertIn('rotary-buddy-dns.webp', hero)
         self.assertIn('UI PREVIEW', html)
         self.assertIn("document.getElementById('previewMedia').hidden", script)
         self.assertIn("document.getElementById('previewBuddy').hidden", script)

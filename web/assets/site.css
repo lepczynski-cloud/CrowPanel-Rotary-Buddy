@@ -191,3 +191,38 @@ body::before { content:"";position:fixed;z-index:-1;inset:-28%;pointer-events:no
 }
 
 @media (max-width:560px) { .orbit-one { inset:16%; } .orbit-two { inset:20%; } }
+
+
+/* Hero gallery: two authentic device photos plus the existing Media UI render. */
+.hero { min-height:705px; }
+.hero-visual { min-height:575px; }
+.photo-primary { left:3%;top:5%;width:94%;aspect-ratio:1.92;transform:rotate(-2deg);z-index:1; }
+.photo-detail { right:4%;bottom:9%;width:30%;aspect-ratio:.77;z-index:3; }
+.photo-media { left:3%;bottom:12%;width:43%;aspect-ratio:1;z-index:4;border-radius:50%;padding:5px;overflow:visible;background:#0d2330;box-shadow:0 14px 42px #000a,0 0 0 1px #77e6dd4d;transform:rotate(-4deg);animation:mediaFloat 7.5s ease-in-out infinite alternate; }
+.photo-media img {border-radius:50%;object-fit:contain;display:block;}
+.photo-media figcaption {position:absolute;left:-6%;right:-6%;bottom:-33px;text-align:center;font-size:11px;font-weight:800;letter-spacing:.1em;color:#a8fff2;text-shadow:0 2px 9px #000;}
+.photo-media figcaption span {color:#bdcbd9;font-weight:600;letter-spacing:.04em;}
+.photo-credit {left:0;right:0;bottom:-2%;font-size:11px;}
+@keyframes mediaFloat {from{transform:rotate(-4deg) translateY(-4px)}to{transform:rotate(-2deg) translateY(4px)}}
+@media (max-width:950px){
+ .hero{min-height:0;}
+ .hero-visual{min-height:570px;max-width:640px;}
+ .photo-primary{width:91%;left:4%;top:5%;}
+ .photo-media{left:5%;width:41%;bottom:12%;}
+ .photo-detail{right:6%;width:30%;bottom:10%;}
+}
+@media (max-width:560px){
+ .hero-visual{min-height:365px;max-width:400px;}
+ .photo-primary{left:3%;top:5%;width:94%;aspect-ratio:1.88;transform:rotate(-2deg);}
+ .photo-media{left:1%;bottom:12%;width:47%;padding:3px;}
+ .photo-detail{right:1%;bottom:12%;width:30%;aspect-ratio:.72;}
+ .photo-media figcaption{font-size:9px;bottom:-25px;letter-spacing:.055em;}
+ .photo-credit{bottom:-5%;font-size:9px;}
+}
+@media(prefers-reduced-motion:reduce){.photo-media{animation:none!important;}}
+/* Keep the real-photo badge visible above the overlapping Media card. */
+.photo-primary figcaption { left:auto;right:14px;top:14px;bottom:auto; }
+@media(max-width:560px){
+ .photo-primary figcaption {right:10px;top:10px;bottom:auto;left:auto;}
+ .photo-detail {right:4%;}
+}

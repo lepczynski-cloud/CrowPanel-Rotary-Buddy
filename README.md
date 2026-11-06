@@ -5,10 +5,11 @@ A small media controller that turns into an expressive desktop companion when yo
 **[Open the website and install firmware](https://crowpanel-rotary-buddy.lepczynski.it/)** · [Source code](https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy) · [YouTube](https://www.youtube.com/@WojciechLepczynski) · [Blog](https://lepczynski.it/)
 
 <p align="center">
-  <a href="https://crowpanel-rotary-buddy.lepczynski.it/"><img src="web/assets/rotary-buddy-real.webp" alt="Real CrowPanel Rotary Buddy device with a smiling face and headphones" width="62%"></a>
-  <a href="https://crowpanel-rotary-buddy.lepczynski.it/"><img src="web/assets/rotary-buddy-dns.webp" alt="Real Rotary Buddy device showing the IS IT DNS? message" width="27%"></a>
+  <a href="https://crowpanel-rotary-buddy.lepczynski.it/"><img src="web/assets/rotary-buddy-real.webp" alt="Real CrowPanel Rotary Buddy device with a smiling face and headphones" width="48%"></a>
+  <a href="https://crowpanel-rotary-buddy.lepczynski.it/"><img src="web/assets/readme-media.webp" alt="Illustrative Media mode with playback, skip, mute and volume controls" width="24%"></a>
+  <a href="https://crowpanel-rotary-buddy.lepczynski.it/"><img src="web/assets/rotary-buddy-dns.webp" alt="Real Rotary Buddy device showing the IS IT DNS? message" width="19%"></a>
 </p>
-<p align="center"><sub>Real photographs of the working device. The other screen previews on the website are illustrations.</sub></p>
+<p align="center"><sub>Real device photographs on the left and right. The Media interface in the middle is an illustration of the on-device controls.</sub></p>
 
 Turn the dial to change volume, press it to play or pause, or touch the screen to skip tracks and mute sound. Swipe sideways and it becomes Buddy, a little animated character that reacts when you tap or pet it, says silly things and eventually falls asleep.
 
