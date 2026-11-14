@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <USB.h>
 #include <USBHID.h>
-#include <USBHIDKeyboard.h>
 #include <USBHIDConsumerControl.h>
 #include <Preferences.h>
 #include <LovyanGFX.hpp>
@@ -19,7 +18,6 @@
 // Rotary Buddy: two pages, standard USB media HID on every host.
 // No host shortcuts, Wi-Fi, Bluetooth, native companion application, or audio.
 static USBHID hid;
-static USBHIDKeyboard keyboard;
 static USBHIDConsumerControl consumer;
 static RoundDisplay display;
 static lgfx::LGFX_Sprite framebuffer(&display);
@@ -27,8 +25,7 @@ static bool framebufferReady = false;
 static CST816Touch touch;
 static TouchGesture gesture;
 static VolumeScaler volumeScaler(Config::VOLUME_SPEED_DIVISOR);
-static VolumeIndicator volumeIndicator(Config::VOLUME_INDICATOR_INITIAL_PERCENT,
-                                       Config::VOLUME_INDICATOR_PERCENT_PER_REPORT);
+static VolumeFeedback volumeFeedback;
 static BuddyBrain buddy;
 static Preferences preferences;
 
@@ -55,8 +52,7 @@ static uint32_t lastFrameAt = 0;
 static uint32_t feedbackAt = 0;
 static uint32_t pageChangedAt = 0;
 static uint32_t lastDisconnectedCheckAt = 0;
-static int queueVolume = 0;
-static bool mutedLocally = false; // USB HID has no way to read host mute state
+static VolumeQueue queueVolume(Config::MAX_PENDING_VOLUME_PULSES);
 static uint8_t feedbackKind = 0; // 1 prev, 2 next, 3 play/pause, 4 mute
 static uint8_t brightness = Config::DEFAULT_BRIGHTNESS;
 
@@ -92,10 +88,9 @@ static void markActivity(uint32_t now, bool playful = false) {
 
 static bool mediaKey(uint16_t usage) {
     if (!hid.ready()) return false;
-    consumer.press(usage);
+    if (!consumer.press(usage)) return false;
     delay(12);
-    consumer.release();
-    return true;
+    return consumer.release() != 0;
 }
 
 static void navigate(uint32_t now, bool manual) {
@@ -126,47 +121,44 @@ static void handleEncoder(uint32_t now) {
     if (!steps) return;
 
     const int direction = steps * Config::ENCODER_DIRECTION;
-    const bool fast = lastDetentAt != 0 &&
-                      (now - lastDetentAt) < Config::FAST_TURN_MS;
+    const bool fast = (steps > 1 || steps < -1) ||
+                      (lastDetentAt != 0 && (now - lastDetentAt) < Config::FAST_TURN_MS);
     lastDetentAt = now;
     const int pulses = fast ? Config::FAST_VOLUME_PULSES : Config::VOLUME_PULSES_PER_DETENT;
     const int scaled = volumeScaler.apply(direction * pulses);
     markActivity(now);
     if (!scaled) return;
-    // Clear stale reports on reversal so the physical dial remains responsive.
-    if ((scaled > 0 && queueVolume < 0) || (scaled < 0 && queueVolume > 0))
-        queueVolume = 0;
-    queueVolume += scaled;
-    if (queueVolume > Config::MAX_PENDING_VOLUME_PULSES)
-        queueVolume = Config::MAX_PENDING_VOLUME_PULSES;
-    if (queueVolume < -Config::MAX_PENDING_VOLUME_PULSES)
-        queueVolume = -Config::MAX_PENDING_VOLUME_PULSES;
-    volumeIndicator.report(scaled, now);
+    queueVolume.add(scaled);
+    volumeFeedback.turn(scaled, now);
 }
 
 static void flushVolume(uint32_t now) {
     if (!hid.ready()) {
         if (volumeKeyDown) consumer.release();
         volumeKeyDown = false;
-        queueVolume = 0;
+        queueVolume.reset();
         volumeScaler.reset();
         return;
     }
     if (volumeKeyDown) {
         if (now - keyPressedAt >= Config::VOLUME_KEY_HOLD_MS) {
-            consumer.release();
-            volumeKeyDown = false;
-            lastVolumeReportAt = now;
+            if (consumer.release()) {
+                volumeKeyDown = false;
+                lastVolumeReportAt = now;
+            }
         }
         return;
     }
-    if (queueVolume == 0 || now - lastVolumeReportAt < Config::VOLUME_EVENT_GAP_MS)
+    if (queueVolume.pending() == 0 || now - lastVolumeReportAt < Config::VOLUME_EVENT_GAP_MS)
         return;
-    consumer.press(queueVolume > 0 ? CONSUMER_CONTROL_VOLUME_INCREMENT :
-                                      CONSUMER_CONTROL_VOLUME_DECREMENT);
-    volumeKeyDown = true;
-    keyPressedAt = now;
-    queueVolume += queueVolume > 0 ? -1 : 1;
+    const int direction = queueVolume.direction();
+    // Do not discard a queued command if the USB endpoint is temporarily busy.
+    if (consumer.press(direction > 0 ? CONSUMER_CONTROL_VOLUME_INCREMENT :
+                                       CONSUMER_CONTROL_VOLUME_DECREMENT)) {
+        volumeKeyDown = true;
+        keyPressedAt = now;
+        queueVolume.sent();
+    }
 }
 
 static void runMediaButton(MediaButton button, uint32_t now) {
@@ -191,11 +183,17 @@ static void runMediaButton(MediaButton button, uint32_t now) {
         default: return;
     }
     markActivity(now);
-    if (mediaKey(usage)) {
-        if (button == MediaButton::Mute) mutedLocally = !mutedLocally;
-    } else {
-        feedbackKind = 0;
+    // Never overlap a pending volume press with a different media usage.
+    if (volumeKeyDown) {
+        if (consumer.release()) {
+            volumeKeyDown = false;
+            lastVolumeReportAt = now;
+        } else {
+            feedbackKind = 0;
+            return;
+        }
     }
+    if (!mediaKey(usage)) feedbackKind = 0;
     feedbackAt = now;
 }
 
@@ -256,8 +254,8 @@ static void handleTouch(uint32_t now) {
         } else {
             // The volume animation temporarily hides media buttons. The first
             // tap dismisses it instead of activating a hidden control.
-            if (volumeIndicator.visible(now, Config::VOLUME_OVERLAY_MS)) {
-                volumeIndicator.dismiss();
+            if (volumeFeedback.visible(now, Config::VOLUME_OVERLAY_MS)) {
+                volumeFeedback.dismiss();
                 return;
             }
             const MediaButton start = mediaHitTest(event.startX, event.startY);
@@ -273,23 +271,22 @@ static void handleTouch(uint32_t now) {
 }
 
 static void drawFrame(uint32_t now) {
-    volumeIndicator.update();
-    const bool showVolume = volumeIndicator.visible(now, Config::VOLUME_OVERLAY_MS);
+    const bool showVolume = volumeFeedback.visible(now, Config::VOLUME_OVERLAY_MS);
     const bool showFeedback = (now - feedbackAt) < Config::FEEDBACK_MS;
     const int kind = showFeedback ? feedbackKind : 0;
     const uint32_t since = now - feedbackAt;
     if (screen == Screen::Media) {
         if (framebufferReady) {
             framebuffer.startWrite();
-            Art::media(framebuffer, now, volumeIndicator.displayed(), showVolume,
-                       kind, since, usbConnected, mutedLocally);
+            Art::media(framebuffer, now, volumeFeedback.direction(), showVolume,
+                       kind, since, usbConnected);
             Art::transition(framebuffer, now - pageChangedAt, Config::TRANSITION_MS, false);
             framebuffer.endWrite();
             framebuffer.pushSprite(0, 0);
         } else {
             display.startWrite();
-            Art::media(display, now, volumeIndicator.displayed(), showVolume,
-                       kind, since, usbConnected, mutedLocally);
+            Art::media(display, now, volumeFeedback.direction(), showVolume,
+                       kind, since, usbConnected);
             Art::transition(display, now - pageChangedAt, Config::TRANSITION_MS, false);
             display.endWrite();
         }
@@ -297,14 +294,14 @@ static void drawFrame(uint32_t now) {
         if (framebufferReady) {
             framebuffer.startWrite();
             Art::buddy(framebuffer, now, buddy.mood(), buddy.elapsed(now), buddy.quip(),
-                       showVolume, volumeIndicator.displayed(), usbConnected);
+                       showVolume, volumeFeedback.direction(), usbConnected);
             Art::transition(framebuffer, now - pageChangedAt, Config::TRANSITION_MS, true);
             framebuffer.endWrite();
             framebuffer.pushSprite(0, 0);
         } else {
             display.startWrite();
             Art::buddy(display, now, buddy.mood(), buddy.elapsed(now), buddy.quip(),
-                       showVolume, volumeIndicator.displayed(), usbConnected);
+                       showVolume, volumeFeedback.direction(), usbConnected);
             Art::transition(display, now - pageChangedAt, Config::TRANSITION_MS, true);
             display.endWrite();
         }
@@ -389,7 +386,6 @@ void setup() {
     touchReady = touch.begin();
     USB.manufacturerName("lepczynski-cloud");
     USB.productName("CrowPanel Rotary Buddy");
-    keyboard.begin();
     consumer.begin();
     USB.begin();
     usbConnected = hid.ready();

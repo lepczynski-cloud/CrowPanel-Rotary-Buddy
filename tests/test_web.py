@@ -175,7 +175,10 @@ class WebTests(unittest.TestCase):
         self.assertIn('text(g, "R O T A R Y   B U D D Y", 120, 63, 1, MUTED)', graphics)
         self.assertIn('text(g, "PREV", 47, 165, 1, MUTED)', graphics)
         self.assertIn('text(g, "NEXT", 193, 165, 1, MUTED)', graphics)
-        self.assertIn('text(g, mutedLocally ? "MUTED" : "SOUND ON", 120, 219', graphics)
+        self.assertIn('"MUTE KEY SENT" : "MUTE"', graphics)
+        self.assertIn('"USB HID CONTROL"', graphics)
+        self.assertNotIn('"%d%%"', graphics)
+        self.assertNotIn('"ESTIMATED"', graphics)
         self.assertNotIn('g.fillCircle(28, 178, 1, GOLD)', graphics)
         self.assertNotIn('g.fillCircle(205, 57, 1, VIOLET)', graphics)
         html = (ROOT / 'web/index.html').read_text(encoding='utf-8')
@@ -260,6 +263,24 @@ class WebTests(unittest.TestCase):
         self.assertFalse(list((ROOT / '.github/workflows').glob('*.yml')))
         self.assertNotIn('not published yet', html + js)
         self.assertNotIn('EXPORT_WEB_WINDOWS.bat', html + js)
+
+    def test_driverless_cross_platform_media_protocol(self):
+        code = (ROOT / 'src/main.cpp').read_text()
+        readme = (ROOT / 'README.md').read_text()
+        self.assertIn('#include <USBHIDConsumerControl.h>', code)
+        self.assertNotIn('#include <USBHIDKeyboard.h>', code)
+        for k in ('CONSUMER_CONTROL_VOLUME_INCREMENT',
+                  'CONSUMER_CONTROL_VOLUME_DECREMENT',
+                  'CONSUMER_CONTROL_PLAY_PAUSE',
+                  'CONSUMER_CONTROL_SCAN_NEXT',
+                  'CONSUMER_CONTROL_SCAN_PREVIOUS',
+                  'CONSUMER_CONTROL_MUTE'):
+            self.assertIn(k, code)
+        for os_name in ('Windows', 'macOS', 'Linux'):
+            self.assertIn(os_name, readme)
+        self.assertIn('no volume percentage', readme.lower())
+        self.assertIn('without a misleading percentage', (ROOT / 'web/index.html').read_text())
+        self.assertNotIn('0 to 100% (estimated', (ROOT / 'web/index.html').read_text())
 
     def test_partition_layout_consistency(self):
         partition = (ROOT / 'partitions.csv').read_text()

@@ -153,6 +153,7 @@ public:
         nextIdleAt_ = now + 8000;
         sleeping_ = false;
         previousQuipIndex_ = 0xffffu;
+        lastPetLine_ = 0xffu;
     }
 
     void activity(uint32_t now, bool playful = false) {
@@ -174,7 +175,7 @@ public:
                     Mood::Rainbow, Mood::Mischief, Mood::Victory, Mood::Disco,
                     Mood::Confetti, Mood::Rocket, Mood::Wave, Mood::Glitch,
                     Mood::Fireworks, Mood::Zoomies, Mood::Wiggle, Mood::Boop,
-                    Mood::Curious, Mood::HelloWave, Mood::HeadTilt, Mood::PetBliss,
+                    Mood::Curious, Mood::HelloWave, Mood::HeadTilt,
                     Mood::Crown, Mood::TopHat, Mood::Beanie, Mood::Headphones,
                     Mood::Prompting, Mood::CodeReview, Mood::ShipIt
                 };
@@ -189,16 +190,17 @@ public:
     void pet(uint32_t now) {
         sleeping_ = false;
         lastInteraction_ = now;
-        static constexpr Mood petMoods[] = {
-            Mood::PetBliss, Mood::Purr, Mood::Nuzzle,
-            Mood::Happy, Mood::Blush, Mood::Bashful
-        };
+        // A gentle, continuous left-to-right closed-eye sway. Unlike the old
+        // random reaction, every stroke feels like the same friendly gesture.
         static constexpr const char *petLines[] = {
             "THAT FEELS NICE!", "PURRR...", "THANK YOU!",
             "PET ME AGAIN!", "BEST HUMAN!", "I LIKE YOU!"
         };
-        const unsigned choice = random(sizeof(petMoods) / sizeof(petMoods[0]));
-        play(petMoods[choice], now, 2300 + random(800), petLines[choice]);
+        constexpr unsigned count = sizeof(petLines) / sizeof(petLines[0]);
+        unsigned choice = random(lastPetLine_ < count ? count - 1 : count);
+        if (lastPetLine_ < count && choice >= lastPetLine_) ++choice;
+        lastPetLine_ = static_cast<uint8_t>(choice);
+        play(Mood::PetBliss, now, 2300, petLines[choice]);
     }
 
     void update(uint32_t now, uint32_t sleepAfterMs) {
@@ -249,7 +251,7 @@ public:
                 Mood::HighFive, Mood::Panic, Mood::Weekend, Mood::Rollback,
                 Mood::Ping, Mood::Typing, Mood::Freeze, Mood::Zoomies,
                 Mood::Noodle, Mood::Hypno, Mood::Magnet,
-                Mood::PetBliss, Mood::Purr, Mood::Nuzzle, Mood::HeadTilt,
+                Mood::Purr, Mood::Nuzzle, Mood::HeadTilt,
                 Mood::HappyDance, Mood::Curious, Mood::Cap, Mood::Beanie,
                 Mood::TopHat, Mood::WizardHat, Mood::Headphones, Mood::Crown,
                 Mood::PartyHat, Mood::SleepCap, Mood::Sunglasses, Mood::Whistle,
@@ -290,6 +292,7 @@ private:
     const char *activeQuip_ = nullptr;
     bool sleeping_ = false;
     uint16_t previousQuipIndex_ = 0xffffu;
+    uint8_t lastPetLine_ = 0xffu;
 
     // Uniform selection excluding the immediately previous caption.
     // Prevents a distracting duplicate when repeatedly tapping Buddy.

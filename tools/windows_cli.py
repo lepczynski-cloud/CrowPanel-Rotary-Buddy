@@ -219,7 +219,7 @@ def main() -> int:
     code = run_command(upload)
     if code == 0:
         print("\nSuccess. Tap RESET once or reconnect USB if the application does not start.")
-        print("Windows should detect a USB HID keyboard/media-control device.")
+        print("Windows should detect a USB HID consumer media-control device.")
         print("The temporary bootloader COM port normally disappears after startup.")
     else:
         print("\nUpload failed. The firmware build itself was successful.")

@@ -50,7 +50,7 @@ for (const button of document.querySelectorAll('[data-preview]')) {
     document.getElementById('previewMedia').hidden = mode !== 'media';
     document.getElementById('previewBuddy').hidden = mode !== 'buddy';
     document.getElementById('previewHint').textContent = mode === 'media'
-      ? 'Rotate for volume, tap to skip tracks or mute, press the knob to pause.'
+      ? 'Rotate for volume, tap to skip or mute, press the knob to play or pause.'
       : 'Buddy reacts to taps, petting and idle time.';
     for (const other of document.querySelectorAll('[data-preview]')) {
       const active = other === button;

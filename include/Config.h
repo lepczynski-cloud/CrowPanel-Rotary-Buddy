@@ -28,23 +28,19 @@ constexpr bool TOUCH_SWAP_XY = false;
 constexpr bool TOUCH_INVERT_X = false;
 constexpr bool TOUCH_INVERT_Y = false;
 
-// Volume speed: 2 = slower, 1 = faster; tune to taste.
-// Both pages use the knob for host volume and the button for Play/Pause.
+// Standard cross-platform USB HID consumer commands. The host chooses the
+// percentage change per key press. Avoid too many outstanding repeats when the
+// rotary is spun quickly: our OLED shows direction, NEVER a guessed percentage.
 constexpr int ENCODER_DIRECTION = 1;
 constexpr int ENCODER_EDGES_PER_STEP = 4;
-constexpr int VOLUME_PULSES_PER_DETENT = 3;
-constexpr int FAST_VOLUME_PULSES = 5;
+constexpr int VOLUME_PULSES_PER_DETENT = 2;
+constexpr int FAST_VOLUME_PULSES = 3;
 constexpr int VOLUME_SPEED_DIVISOR = 2;
 constexpr unsigned long FAST_TURN_MS = 100;
-constexpr unsigned long VOLUME_EVENT_GAP_MS = 6;
-constexpr unsigned long VOLUME_KEY_HOLD_MS = 12;
-constexpr int MAX_PENDING_VOLUME_PULSES = 120;
-
-// Volume display is ONLY an estimate, not a reading from the host computer.
-// HID volume up/down cannot query the real volume percentage.
-constexpr int VOLUME_INDICATOR_INITIAL_PERCENT = 50;
-constexpr int VOLUME_INDICATOR_PERCENT_PER_REPORT = 2;
-constexpr unsigned long VOLUME_OVERLAY_MS = 2300;
+constexpr unsigned long VOLUME_EVENT_GAP_MS = 8;
+constexpr unsigned long VOLUME_KEY_HOLD_MS = 14;
+constexpr int MAX_PENDING_VOLUME_PULSES = 64;
+constexpr unsigned long VOLUME_OVERLAY_MS = 1250;
 
 // CST816D is read by I2C polling so an IRQ polarity mismatch cannot block touch.
 constexpr unsigned long TOUCH_POLL_MS = 12;

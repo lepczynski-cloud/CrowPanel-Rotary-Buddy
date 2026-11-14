@@ -13,24 +13,26 @@ A small media controller that turns into an expressive desktop companion when yo
 
 Turn the dial to change volume, press it to play or pause, or touch the screen to skip tracks and mute sound. Swipe sideways and it becomes Buddy, a little animated character that reacts when you tap or pet it, says silly things and eventually falls asleep.
 
+**What's new in firmware 1.3:** Petting now triggers a soft closed-eye smile that sweeps left to right. The media dial sends paced, cross-platform USB HID commands and displays up/down direction instead of a guessed volume percentage. Rapid reversals clear pending commands, and the device presents only a consumer-media HID interface, not an unnecessary keyboard interface.
+
 The current firmware has **113 expression/effect states and 135 short captions**. New moods include AI prompting, code review, on-call, packet loss, safe deployments and cloud operations. These are *visual jokes*, not actual AI processing, network monitoring, background services or commands run on your computer. Buddy now also avoids repeating the exact same randomly chosen caption on consecutive selections.
 
-There is **no desktop application, Bluetooth pairing, account, cloud backend or internet connection needed for normal use**. The computer sees a standard USB HID consumer-media controller. Media key support depends on the host OS and player; Windows, macOS and Linux are supported in principle.
+**Windows, macOS and Linux:** Rotary Buddy uses standard USB HID Consumer Control usages (volume up/down, mute, previous/next and play/pause). No driver, desktop bridge, Bluetooth, Wi-Fi, account or cloud service is needed for normal use. All three desktop operating systems support USB media-key devices; the exact behaviour of play/pause and skip depends on the active media application, desktop environment and audio device. The project has not been hardware-tested by us on every OS/distribution.
 
 ## Two modes
 
 | Media | Buddy |
 | --- | --- |
-| Previous, Play/Pause, Next and Mute on large touch targets. An animated local volume estimate shows the dial's recent changes. | Animated expressions, blinks, props, hats, short speech bubbles, gentle petting reactions, idle animation and sleep. |
+| Previous, Play/Pause, Next and Mute on large touch targets. The dial now shows a brief **Volume Up/Down** animation instead of an unreliable percentage. | Animated expressions, blinks, props, hats, short speech bubbles, gentle petting reactions, idle animation and sleep. |
 
 <p align="center"><img src="web/assets/readme-media.webp" alt="Illustrative Media UI preview" width="43%"> <img src="web/assets/readme-buddy.webp" alt="Illustrative Buddy UI preview" width="43%"></p>
 <p align="center"><sub>Illustrative screen previews, not photographs.</sub></p>
 
-**Controls:** Rotate to adjust volume; short press to play or pause; swipe horizontally to change screens; swipe downward on Buddy to pet it; tap Buddy for a random mood or joke. Tapping media controls sends USB media keys, but playful Buddy touches never do. The media screen changes to Buddy after 30 seconds without interaction. Buddy begins sleeping after five minutes and wakes when you interact again. Both intervals are configurable.
+**Controls:** Rotate to adjust volume; short press to play or pause; swipe horizontally to change screens; swipe downward on Buddy for a gentle **closed-eye left-to-right smile**; tap Buddy for a random mood or joke. Tapping media controls sends USB media keys, but playful Buddy touches never do. The media screen changes to Buddy after 30 seconds without interaction. Buddy begins sleeping after five minutes and wakes when you interact again. Both intervals are configurable.
 
 A few current captions: `COFFEE FIRST`, `IS IT DNS?`, `VERIFY THE OUTPUT`, `HUMAN IN THE LOOP`, `CHECK THE DIFF`, `PAGER AGAIN?`, `PACKET LOST!`, `CANARY FIRST`, `CLOUD BILL AGAIN` and `ROLLBACK READY?`.
 
-**Limitations:** USB HID cannot read the computer's exact volume, playback status or mute state. The screen's volume percentage and mute symbol are local estimates based on actions sent from the dial. They may differ from settings changed on the computer itself.
+**Why there is no volume percentage:** USB HID media keys cannot read the real host volume. Previously the screen estimated it and could disagree badly after fast turns or after changing volume on the computer. The new indicator reports **Volume Up/Down commands**, never a false percentage. HID repeats are paced, sent commands are not dropped when USB is temporarily busy, and rapid direction reversals clear stale queued actions. The Mute button likewise shows momentary command feedback, not a guessed permanent mute state. Exact synchronized volume percentages would require a separate PC-side app and a bidirectional protocol, which this driver-free device deliberately does not use.
 
 ## Install without Arduino IDE or PlatformIO
 
@@ -68,7 +70,7 @@ The browser interface uses [ESP Web Tools](https://esphome.github.io/esp-web-too
 
 ## Develop or customize
 
-PlatformIO source files are in `src/main.cpp` and `include/`. `include/Config.h` controls things such as sleep time, automatic mode switching, screen brightness and volume sensitivity. Expressions and captions live in `include/BuddyBrain.h`; their drawing code lives in `include/BuddyGraphics.h`.
+PlatformIO source files are in `src/main.cpp` and `include/`. `include/Config.h` controls things such as sleep time, automatic mode switching, screen brightness and HID volume sensitivity. Expressions and captions live in `include/BuddyBrain.h`; their drawing code lives in `include/BuddyGraphics.h`.
 
 You can build locally if you prefer: `pio run -e crowpanel-rotary`. Windows helper scripts `BUILD_WINDOWS.bat` and `FLASH_WINDOWS.bat` are included for local developer use, but are not required to use the website installer.
 

@@ -142,38 +142,50 @@ void skipParticles(G &g, uint32_t elapsed, int direction) {
         direction < 0 ? 240 - 70 * t : 60 + 70 * t, SKY, 3);
 }
 
+// The animated ring represents the *direction* of a sent volume command.
+// HID provides no readback, so no absolute percentage or persistent level bar.
 template <typename G>
-void drawVolumeRing(G &g, int percent, uint32_t now, bool vivid) {
+void drawVolumeActivityRing(G &g, int direction, uint32_t now, bool active) {
     arc(g, 120, 120, 104, 140, 400, EDGE, 3);
-    const float end = 140.0f + 260.0f * static_cast<float>(percent) / 100.0f;
-    if (percent > 0) arc(g, 120, 120, 104, 140, end, vivid ? CYAN : SKY, vivid ? 4 : 2);
+    if (!active) return;
+    const float pulse = 0.5f + 0.5f * wave(now, 0.014f);
+    const float from = direction >= 0 ? 140.0f : 320.0f;
+    const float end = from + 40.0f + 60.0f * pulse;
+    arc(g, 120, 120, 104, from, end, direction >= 0 ? CYAN : VIOLET, 4);
     const float theta = end * DEG;
-    const int x = 120 + ix(cosf(theta) * 104);
-    const int y = 120 + ix(sinf(theta) * 104);
-    g.fillCircle(x, y, vivid ? 5 : 3, vivid ? WHITE : SKY);
-    if (vivid) {
-        const float offset = wave(now, 0.009f);
-        g.drawCircle(x, y, 7 + ix(fabsf(offset) * 3), CYAN);
-    }
+    g.fillCircle(120 + ix(cosf(theta) * 104),
+                 120 + ix(sinf(theta) * 104), 5, WHITE);
 }
 
 template <typename G>
-void media(G &g, uint32_t now, int volumePct, bool showVolume,
-           int feedbackKind, uint32_t feedbackElapsed, bool usbConnected, bool mutedLocally) {
+void media(G &g, uint32_t now, int volumeDirection, bool showVolume,
+           int feedbackKind, uint32_t feedbackElapsed, bool usbConnected) {
     base(g, now);
-    // Main title first, smaller brand beneath it. Keep both clear of buttons.
     text(g, "MEDIA", 120, 34, 4, WHITE);
     text(g, "R O T A R Y   B U D D Y", 120, 63, 1, MUTED);
     g.fillCircle(194, 45, 3, usbConnected ? GREEN : ROSE);
-    drawVolumeRing(g, volumePct, now, showVolume);
+    drawVolumeActivityRing(g, volumeDirection, now, showVolume);
     if (showVolume) {
         g.fillCircle(120, 119, 83, BG);
         g.drawCircle(120, 119, 83, PANEL);
-        char label[12];
-        snprintf(label, sizeof(label), "%d%%", volumePct);
-        text(g, "VOLUME", 120, 91, 2, MUTED);
-        text(g, label, 120, 126, 4, WHITE, 2);
-        text(g, "ESTIMATED", 120, 165, 1, SKY);
+        if (!usbConnected) {
+            text(g, "NO USB HOST", 120, 103, 2, ROSE);
+            text(g, "CONNECT CABLE", 120, 145, 2, WHITE);
+        } else {
+            text(g, "VOLUME", 120, 92, 2, MUTED);
+            // Icons indicate commands, not a guessed computer volume level.
+            const bool up = volumeDirection >= 0;
+            const uint16_t shade = up ? CYAN : VIOLET;
+            if (up) {
+                g.fillTriangle(120, 105, 101, 135, 139, 135, shade);
+                g.fillRoundRect(110, 132, 20, 22, 4, shade);
+            } else {
+                g.fillRoundRect(110, 108, 20, 22, 4, shade);
+                g.fillTriangle(101, 127, 139, 127, 120, 158, shade);
+            }
+            text(g, up ? "UP" : "DOWN", 120, 174, 2, WHITE);
+            text(g, "USB HID CONTROL", 120, 201, 1, MUTED);
+        }
     } else {
         const int locations[4][2] = {{47, 119}, {120, 119}, {193, 119}, {120, 188}};
         for (int i = 0; i < 4; ++i) {
@@ -181,11 +193,14 @@ void media(G &g, uint32_t now, int volumePct, bool showVolume,
             const uint16_t fill = i == 1 ? CYAN : PANEL;
             g.fillCircle(locations[i][0], locations[i][1], radius, fill);
             g.drawCircle(locations[i][0], locations[i][1], radius, i == 1 ? SKY : DIM);
-            mediaGlyph(g, i, locations[i][0], locations[i][1], i == 1 ? BG : WHITE, mutedLocally);
+            mediaGlyph(g, i, locations[i][0], locations[i][1],
+                       i == 1 ? BG : WHITE, i == 3 && feedbackKind == 4 && feedbackElapsed < 700);
         }
         text(g, "PREV", 47, 165, 1, MUTED);
         text(g, "NEXT", 193, 165, 1, MUTED);
-        text(g, mutedLocally ? "MUTED" : "SOUND ON", 120, 219, 1, mutedLocally ? ROSE : SKY);
+        // A toggle key is not confirmation that the computer is muted.
+        text(g, (feedbackKind == 4 && feedbackElapsed < 700) ? "MUTE KEY SENT" : "MUTE",
+             120, 219, 1, MUTED);
     }
     if (feedbackKind == 1 || feedbackKind == 2) {
         skipParticles(g, feedbackElapsed, feedbackKind == 1 ? -1 : 1);
@@ -199,7 +214,6 @@ void media(G &g, uint32_t now, int volumePct, bool showVolume,
             spark(g, 120 + ix(cosf(a) * 53), 184 + ix(sinf(a) * 25), 3, ROSE);
         }
     }
-    // No page indicator on Media: the bottom is reserved for Mute state.
 }
 
 // Eye style and expression calculation are intentionally data-driven so a
@@ -305,7 +319,8 @@ inline Face faceFor(Mood mood, uint32_t elapsed, uint32_t now) {
         case Mood::Noodle: f.mouth = 5; f.eyeHeight = 23; break;
         case Mood::Hypno: f.eyeStyle = 5; f.mouth = 1; break;
         case Mood::Magnet: f.eyeStyle = 3; f.mouth = 1; f.eyeColor = VIOLET; break;
-        case Mood::PetBliss: f.eyeStyle = 2; f.mouth = 4; f.blush = true; break;
+        case Mood::PetBliss: // closed eyes glide across a warm smile
+            f.eyeStyle = 1; f.mouth = 1; f.blush = true; f.eyeColor = SKY; break;
         case Mood::Purr: f.eyeStyle = 1; f.mouth = 1; f.blush = true; break;
         case Mood::Nuzzle: f.eyeStyle = 2; f.mouth = 1; f.tilt = ix(wave(now, .018f) * 6); break;
         case Mood::HeadTilt: f.eyebrow = 1; f.gazeX = 7; f.mouth = 1; f.tilt = 8; break;
@@ -458,7 +473,7 @@ void bigProp(G &g, Mood mood, uint32_t now) {
         g.fillTriangle(147, y + 30, 140, y + 47, 158, y + 34, ROSE);
         g.fillTriangle(184, y + 29, 194, y + 45, 178, y + 34, GOLD);
         g.fillTriangle(161, y + 33, 177, y + 33, 169, y + 54, GOLD);
-    } else if (mood == Mood::PetBliss || mood == Mood::Purr || mood == Mood::Nuzzle) {
+    } else if (mood == Mood::Purr || mood == Mood::Nuzzle) {
         heart(g, 170 + ix(wave(now, .009f) * 7), 91 - ix((now % 900) / 130), 2, ROSE);
         arc(g, 107, 87, 24, 190, 336, GOLD, 3);
         arc(g, 120, 79, 24, 190, 336, SKY, 3);
@@ -780,9 +795,21 @@ void buddyExtras(G &g, Mood mood, uint32_t elapsed, uint32_t now) {
     }
 }
 
+// Petting animation: gentle left -> right -> centered sweep, with easing.
+// Driven by elapsed time rather than frame count, so it works at any FPS.
+inline int petSwayX(uint32_t elapsed) {
+    auto smooth = [](float t) {
+        t = clampf(t, 0.0f, 1.0f);
+        return t * t * (3.0f - 2.0f * t);
+    };
+    if (elapsed < 940) return ix(-13.0f + 26.0f * smooth(elapsed / 940.0f));
+    if (elapsed < 1700) return ix(13.0f - 13.0f * smooth((elapsed - 940) / 760.0f));
+    return 0;
+}
+
 template <typename G>
 void buddy(G &g, uint32_t now, Mood mood, uint32_t elapsed, const char *quip,
-           bool volumeVisible, int volumePct, bool usbConnected) {
+           bool volumeVisible, int volumeDirection, bool usbConnected) {
     base(g, now);
     // Restrained premium UI with a small, animated character in a round glass.
     arc(g, 120, 120, 105, 205, 324, VIOLET, 2);
@@ -791,8 +818,10 @@ void buddy(G &g, uint32_t now, Mood mood, uint32_t elapsed, const char *quip,
                           mood == Mood::SleepTalk || mood == Mood::SleepCap;
     const bool petting = mood == Mood::PetBliss || mood == Mood::Purr ||
                          mood == Mood::Nuzzle;
-    const int bobX = ix(wave(now, .0015f, .4f) * 7) + ix(wave(now, .003f) * 2);
-    const int bobY = ix(wave(now, sleeping ? .0016f : .0024f) * 4);
+    const int bobX = mood == Mood::PetBliss
+        ? petSwayX(elapsed)
+        : ix(wave(now, .0015f, .4f) * 7) + ix(wave(now, .003f) * 2);
+    const int bobY = mood == Mood::PetBliss ? -2 : ix(wave(now, sleeping ? .0016f : .0024f) * 4);
     const int cx = 120 + bobX;
     const int cy = 120 + bobY;
     g.fillCircle(cx, cy, 79, EDGE);
@@ -820,19 +849,17 @@ void buddy(G &g, uint32_t now, Mood mood, uint32_t elapsed, const char *quip,
     buddyExtras(g, mood, elapsed, now);
     bigProp(g, mood, now);
 
-    // A pet response is intentionally cheerful and visibly distinct.
-    if (petting) {
-        for (int i = 0; i < 3; ++i) {
-            const int drift = ix((elapsed * (i + 2) / 50) % 18);
-            spark(g, 59 + i * 19, 101 - drift, 3 + i, i % 2 ? GOLD : CYAN);
-        }
+    // Small glints accompany a pet without covering the closed eyes or smile.
+    if (mood == Mood::PetBliss) {
+        const int lift = ix(5.0f * sinf(static_cast<float>(elapsed) * .004f));
+        spark(g, 60, 113 - lift, 3, SKY);
+        spark(g, 181, 111 + lift, 3, GOLD);
     }
 
     if (volumeVisible) {
-        drawVolumeRing(g, volumePct, now, true);
-        char label[16]; snprintf(label, sizeof(label), "%d%%", volumePct);
-        g.fillRoundRect(79, 181, 82, 31, 14, PANEL);
-        text(g, label, 120, 196, 2, WHITE);
+        drawVolumeActivityRing(g, volumeDirection, now, true);
+        g.fillRoundRect(73, 181, 94, 31, 14, PANEL);
+        text(g, volumeDirection >= 0 ? "VOL UP" : "VOL DOWN", 120, 196, 2, WHITE);
     } else if (quip && *quip) {
         speechBubble(g, quip, petting || mood == Mood::HelloWave || mood == Mood::Happy);
     } else {

@@ -86,21 +86,37 @@ int main() {
     anticlockwise += rotary.update(false, false);
     assert(anticlockwise == -1);
 
-    // Local dial volume is explicitly an ESTIMATE. Clamp & animate gradually.
-    VolumeIndicator volume(50, 2);
-    assert(volume.displayed() == 50);
-    volume.report(7, 1000);
-    assert(volume.target() == 64 && volume.visible(2000, 2300));
-    volume.update();
-    assert(volume.displayed() > 50 && volume.displayed() < 64);
-    for (int i = 0; i < 40; ++i) volume.update();
-    assert(volume.displayed() == 64);
-    volume.report(-999, 5000);
-    assert(volume.target() == 0);
-    volume.report(1000, 5200);
-    assert(volume.target() == 100);
+    // USB HID does not expose actual host volume. Only show direction.
+    VolumeFeedback volume;
+    assert(!volume.visible(100, 1250));
+    volume.turn(5, 1000);
+    assert(volume.direction() == 1 && volume.visible(2000, 1250));
+    assert(!volume.visible(2300, 1250));
+    volume.turn(-2, 3000);
+    assert(volume.direction() == -1 && volume.visible(3010, 1250));
     volume.dismiss();
-    assert(!volume.visible(5300, 2300));
+    assert(!volume.visible(3050, 1250));
+
+    // Rapid turns are queued with a strict cap; reversing drops old unsent
+    // commands, rather than raising volume later against the user's intent.
+    VolumeQueue queue(64);
+    queue.add(20);
+    assert(queue.pending() == 20 && queue.direction() == 1);
+    queue.sent();
+    assert(queue.pending() == 19);
+    queue.add(1000);
+    assert(queue.pending() == 64);
+    queue.add(-7);
+    assert(queue.pending() == -7 && queue.direction() == -1);
+    queue.sent();
+    assert(queue.pending() == -6);
+    queue.add(-1000);
+    assert(queue.pending() == -64);
+    for (int i = 0; i < 64; ++i) queue.sent();
+    assert(queue.pending() == 0 && queue.direction() == 0);
+    queue.add(3);
+    queue.reset();
+    assert(queue.pending() == 0);
 
     // Autopage timing and uint32 wraparound.
     assert(!shouldAutoBuddy(29000, 0, true, 30000));
@@ -125,12 +141,14 @@ int main() {
     brain.pet(2600 + 305000);
     assert(!brain.sleeping());
     assert(brain.quip() && std::strlen(brain.quip()) > 0);
-    assert(brain.mood() == Mood::PetBliss || brain.mood() == Mood::Purr ||
-           brain.mood() == Mood::Nuzzle || brain.mood() == Mood::Happy ||
-           brain.mood() == Mood::Blush || brain.mood() == Mood::Bashful);
+    assert(brain.mood() == Mood::PetBliss); // consistent closed-eye swaying pet
+    const std::string petCaption = brain.quip();
+    brain.pet(2600 + 305300);
+    assert(brain.mood() == Mood::PetBliss);
+    assert(petCaption != brain.quip()); // avoid repeated pet phrases
 
 
-    // Deterministic random scheduler: all 107 moods defined, many reachable idle
+    // Deterministic random scheduler: all 113 moods defined, many reachable idle
     // reactions actually become reachable, no tight endless animation loop.
     BuddyBrain variety(0x45221923u);
     variety.begin(0);
@@ -176,6 +194,6 @@ int main() {
     assert(heardSleepTalk);
     sleeper.activity(1800500, true);
     assert(!sleeper.sleeping());
-    std::cout << "PASS: gesture safety, encoder, media zones, volume estimate, sleep/wake, "
+    std::cout << "PASS: gesture safety, encoder, media zones, direction-only volume commands, pet sway, sleep/wake, "
               << ids.size() << " sampled animation states\n";
 }

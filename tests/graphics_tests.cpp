@@ -34,15 +34,29 @@ int main() {
         assert(f.eyeWidth > 0 && f.eyeHeight > 0);
         Art::buddy(g, 20000, m, 700, nullptr, false, 50, true);
         Art::buddy(g, 21000, m, 1550, "LET'S GO PROD!", false, 50, true);
-        Art::buddy(g, 22000, m, 2000, "HELLO, WORLD!", true, 80, true);
+        Art::buddy(g, 22000, m, 2000, "HELLO, WORLD!", true, -1, true);
     }
     for (unsigned i = 0; i < BUDDY_QUIP_COUNT; ++i) {
         assert(std::strlen(BUDDY_QUIPS[i].line) <= 24);
         assert(std::strlen(BUDDY_QUIPS[i].line) > 0);
         assert(static_cast<unsigned>(BUDDY_QUIPS[i].mood) < BUDDY_MOOD_COUNT);
     }
-    Art::media(g, 25000, 60, true, 1, 240, true, false);
-    Art::media(g, 26000, 60, false, 3, 500, true, true);
+    // Direction-only USB HID feedback; the renderer never invents 0-100%.
+    Art::media(g, 25000, +1, true, 1, 240, true);
+    Art::media(g, 26000, -1, true, 0, 200, false);
+    Art::media(g, 26500, -1, false, 3, 500, true);
+    // The new PetBliss reaction glides with closed eyes and a gentle smile.
+    const auto petFace = Art::faceFor(Mood::PetBliss, 400, 14000);
+    assert(petFace.eyeStyle == 1 && petFace.mouth == 1 && petFace.blush);
+    assert(Art::petSwayX(0) == -13);
+    assert(Art::petSwayX(470) == 0);
+    assert(Art::petSwayX(940) == 13);
+    assert(Art::petSwayX(1320) >= 5 && Art::petSwayX(1320) <= 8);
+    assert(Art::petSwayX(1700) == 0);
+    for (uint32_t t = 0; t < 2500; t += 45) {
+        assert(Art::petSwayX(t) >= -13 && Art::petSwayX(t) <= 13);
+        Art::buddy(g, 10000 + t, Mood::PetBliss, t, "PET ME AGAIN!", false, 0, true);
+    }
     // The speaker with sound waves must have different geometry from muted.
     MockScreen speakerOn, speakerMuted;
     Art::mediaGlyph(speakerOn, 3, 120, 188, Art::WHITE, false);
