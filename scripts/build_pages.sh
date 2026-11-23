@@ -40,7 +40,6 @@ python tools/export_web.py
 echo '[Rotary Buddy] Verifying published installer payload'
 python tools/verify_release.py web/firmware
 
-echo '[Rotary Buddy] Fetching real, optimized project screenshots (with HTML fallbacks)'
-python scripts/fetch_project_images.py
+echo '[Rotary Buddy] Authentic project previews are bundled in web/assets/projects/'
 
 echo '[Rotary Buddy] All stages passed, Cloudflare Pages may deploy web/'

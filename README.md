@@ -2,14 +2,13 @@
 
 A small media controller that turns into an expressive desktop companion when you are not using it. Built for the **Elecrow CrowPanel 1.28-inch ESP32-S3 rotary display**, with a 240 × 240 circular touchscreen and USB HID media keys.
 
-**[Open the website and install firmware](https://crowpanel-rotary-buddy.lepczynski.it/)** · [Source code](https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy) · [YouTube](https://www.youtube.com/@WojciechLepczynski) · [Blog](https://lepczynski.it/)
+**[Open the website and install firmware](https://crowpanel-rotary-buddy.lepczynski.it/)** · **[Watch the Rotary Buddy video](https://www.youtube.com/watch?v=vjOF7N7Cmbo)** · [Source code](https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy) · [Blog](https://lepczynski.it/)
 
-<p align="center">
-  <a href="https://crowpanel-rotary-buddy.lepczynski.it/"><img src="web/assets/rotary-buddy-real.webp" alt="Real CrowPanel Rotary Buddy device with a smiling face and headphones" width="48%"></a>
-  <a href="https://crowpanel-rotary-buddy.lepczynski.it/"><img src="web/assets/readme-media.webp" alt="Illustrative Media mode with playback, skip, mute and volume controls" width="24%"></a>
-  <a href="https://crowpanel-rotary-buddy.lepczynski.it/"><img src="web/assets/rotary-buddy-dns.webp" alt="Real Rotary Buddy device showing the IS IT DNS? message" width="19%"></a>
-</p>
-<p align="center"><sub>Real device photographs on the left and right. The Media interface in the middle is an illustration of the on-device controls.</sub></p>
+| Buddy on my desk | A little DevOps humour |
+| :---: | :---: |
+| <img src="web/assets/readme-photo-buddy.webp" alt="Real Rotary Buddy device with smiling blue face" width="330"> | <img src="web/assets/readme-photo-dns.webp" alt="Real Rotary Buddy device showing IS IT DNS? on its display" width="330"> |
+
+*Both images are real photos of the hardware, cropped to matching square proportions for GitHub.*
 
 Turn the dial to change volume, press it to play or pause, or touch the screen to skip tracks and mute sound. Swipe sideways and it becomes Buddy, a little animated character that reacts when you tap or pet it, says silly things and eventually falls asleep.
 
@@ -25,14 +24,21 @@ The current firmware has **113 expression/effect states and 135 short captions**
 | --- | --- |
 | Previous, Play/Pause, Next and Mute on large touch targets. The dial now shows a brief **Volume Up/Down** animation instead of an unreliable percentage. | Animated expressions, blinks, props, hats, short speech bubbles, gentle petting reactions, idle animation and sleep. |
 
-<p align="center"><img src="web/assets/readme-media.webp" alt="Illustrative Media UI preview" width="43%"> <img src="web/assets/readme-buddy.webp" alt="Illustrative Buddy UI preview" width="43%"></p>
-<p align="center"><sub>Illustrative screen previews, not photographs.</sub></p>
+| Media UI preview | Buddy UI preview |
+| :---: | :---: |
+| <img src="web/assets/readme-media.webp" alt="Illustrative Media UI with playback and volume controls" width="330"> | <img src="web/assets/readme-buddy.webp" alt="Illustrative Buddy UI with COFFEE FIRST message" width="330"> |
+
+*These are illustrative screen previews, not photographs.*
 
 **Controls:** Rotate to adjust volume; short press to play or pause; swipe horizontally to change screens; swipe downward on Buddy for a gentle **closed-eye left-to-right smile**; tap Buddy for a random mood or joke. Tapping media controls sends USB media keys, but playful Buddy touches never do. The media screen changes to Buddy after 30 seconds without interaction. Buddy begins sleeping after five minutes and wakes when you interact again. Both intervals are configurable.
 
 A few current captions: `COFFEE FIRST`, `IS IT DNS?`, `VERIFY THE OUTPUT`, `HUMAN IN THE LOOP`, `CHECK THE DIFF`, `PAGER AGAIN?`, `PACKET LOST!`, `CANARY FIRST`, `CLOUD BILL AGAIN` and `ROLLBACK READY?`.
 
 **Why there is no volume percentage:** USB HID media keys cannot read the real host volume. Previously the screen estimated it and could disagree badly after fast turns or after changing volume on the computer. The new indicator reports **Volume Up/Down commands**, never a false percentage. HID repeats are paced, sent commands are not dropped when USB is temporarily busy, and rapid direction reversals clear stale queued actions. The Mute button likewise shows momentary command feedback, not a guessed permanent mute state. Exact synchronized volume percentages would require a separate PC-side app and a bidirectional protocol, which this driver-free device deliberately does not use.
+
+## See it in action
+
+Watch the real device, media controls and Buddy reactions in the **[Rotary Buddy YouTube walkthrough](https://www.youtube.com/watch?v=vjOF7N7Cmbo)**. The video is also embedded on the [project website](https://crowpanel-rotary-buddy.lepczynski.it/#video).
 
 ## Install without Arduino IDE or PlatformIO
 
@@ -74,9 +80,11 @@ PlatformIO source files are in `src/main.cpp` and `include/`. `include/Config.h`
 
 You can build locally if you prefer: `pio run -e crowpanel-rotary`. Windows helper scripts `BUILD_WINDOWS.bat` and `FLASH_WINDOWS.bat` are included for local developer use, but are not required to use the website installer.
 
-The Cloudflare build runs host C++ tests (including gesture safety, mood rendering, random caption constraints and media controls), the website's manifest tests and the actual PlatformIO build. It also attempts to fetch genuine screenshots for other project cards on the site. Those images are optional and do not affect flashing.
+The Cloudflare build runs host C++ tests (including gesture safety, mood rendering, random caption constraints and media controls), the website's manifest tests and the actual PlatformIO build. The other-project cards use genuine, optimized images bundled directly in `web/assets/projects/`, so they appear reliably on every deployment without depending on external image downloads.
 
 ## Other projects
+
+The [project website](https://crowpanel-rotary-buddy.lepczynski.it/#projects) includes an actual device photo and real screenshots or output previews from these projects, saved locally alongside the page.
 
 - [ESP32 Admin Pocket Toolkit](https://esp32-admin-toolkit.lepczynski.it/): offline networking and sysadmin utilities on a small touchscreen.
 - [ESP32 PC Control Deck](https://github.com/lepczynski-cloud/ESP32-PC-Control-Deck): hardware PC stats and a USB-connected host bridge.

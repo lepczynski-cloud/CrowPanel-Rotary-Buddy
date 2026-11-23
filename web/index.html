@@ -23,7 +23,7 @@
   <a href="#content" class="skip-link">Skip to content</a>
   <header class="nav shell">
     <a href="#top" class="brand" aria-label="CrowPanel Rotary Buddy home"><span class="brand-mark">◉</span><span>ROTARY <strong>BUDDY</strong></span></a>
-    <nav aria-label="Primary"><a href="#design">Design</a><a href="#gallery">Gallery</a><a href="#install">Install</a><a href="#projects">Projects</a><a href="https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav>
+    <nav aria-label="Primary"><a href="#design">Design</a><a href="#gallery">Gallery</a><a href="#video">Video</a><a href="#install">Install</a><a href="#projects">Projects</a><a href="https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav>
   </header>
   <main id="content">
     <section class="hero shell" id="top">
@@ -32,6 +32,7 @@
         <h1>One dial.<br><span class="gradient">A little life.</span></h1>
         <p class="intro">Meet Rotary Buddy. A media dial when you need it, a playful little friend when you don't. Built for the 1.28-inch Elecrow CrowPanel rotary touchscreen.</p>
         <div class="hero-actions"><a class="btn primary" href="#install">Install firmware <span>↗</span></a><a class="btn secondary" href="https://github.com/lepczynski-cloud/CrowPanel-Rotary-Buddy">Explore the code</a></div>
+        <a class="hero-video-link" href="#video"><span aria-hidden="true">▶</span> See Rotary Buddy in action</a>
         <div class="keyfacts"><span>Two modes: Media + Buddy</span><span>113 animated moods</span><span>Works offline · No desktop app</span></div>
       </div>
       <div class="hero-visual" aria-label="Real Rotary Buddy photographs and an illustrative Media control screen">
@@ -80,6 +81,15 @@
         <article class="mood-card"><img src="./assets/scenes/review.svg" width="240" height="240" loading="lazy" alt="Illustration of Buddy looking critically at a code review and saying CHECK THE DIFF"><h3>CHECK THE DIFF</h3><p>Before you click merge</p></article>
       </div>
     </section>
+    <section class="video-section shell" id="video" aria-labelledby="videoTitle">
+      <div class="video-heading">
+        <div><p class="eyebrow">WATCH THE DEMO</p><h2 id="videoTitle">Rotary Buddy in action.</h2><p>See the real device, the media controls and Buddy's reactions in my YouTube walkthrough.</p></div>
+        <a class="video-youtube-link" href="https://www.youtube.com/watch?v=vjOF7N7Cmbo" target="_blank" rel="noopener noreferrer">Open on YouTube <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="video-frame">
+        <iframe src="https://www.youtube-nocookie.com/embed/vjOF7N7Cmbo" title="CrowPanel Rotary Buddy: device demonstration and media controller" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+    </section>
     <section class="section shell" id="install">
       <div class="section-head"><p class="eyebrow">WEB FLASHER</p><h2>From browser<br>to desk companion.</h2><p>No Arduino IDE or desktop installer required. Connect the device and flash firmware directly from your browser. After each successful GitHub update, Cloudflare automatically builds and publishes the new firmware.</p></div>
       <div class="instructions"><div><b>01</b><h3>Connect CrowPanel</h3><p>Use the included data-capable USB lead. Hold BOOT, tap RESET and release BOOT to enter ESP32-S3 download mode.</p></div><div><b>02</b><h3>Install with Chrome or Edge</h3><p>Choose the port and the firmware below. Web Serial requires HTTPS and a supported desktop browser.</p></div><div><b>03</b><h3>Enjoy your Buddy</h3><p>Press RESET after flashing. Your PC sees a standard USB multimedia device, no pairing or background software.</p></div></div>
@@ -91,41 +101,41 @@
     </section>
     <section class="projects-section shell" id="projects" aria-labelledby="projectsTitle">
       <div class="projects-heading">
-        <div><p class="eyebrow">MORE FROM MY WORKBENCH</p><h2 id="projectsTitle">More things I've built.</h2><p>Real builds and browser tools, with previews taken from their source repositories when available. Visit each project or explore its code.</p></div>
+        <div><p class="eyebrow">MORE FROM MY WORKBENCH</p><h2 id="projectsTitle">More things I've built.</h2><p>A real device photo and authentic screenshots or output from my other open-source projects. Open a project or explore its code.</p></div>
         <a class="projects-all-link" href="https://github.com/lepczynski-cloud" target="_blank" rel="noopener noreferrer">Explore all my GitHub projects <span aria-hidden="true">↗</span></a>
       </div>
       <div class="projects-grid">
         <article class="project-card project-m5">
-          <div class="project-art" role="group" aria-label="M5Stack Touch Control Deck, real device photo from the project repository">
+          <div class="project-art" role="group" aria-label="M5Stack Touch Control Deck, photograph of the real device on a desk">
             <div class="project-art-fallback" aria-hidden="true"><span>M5STACK CONTROL DECK</span><small>OPEN SOURCE PROJECT</small></div>
-            <img class="project-image" data-project-image src="./assets/projects/m5.webp" alt="M5Stack Touch Control Deck, real device photo from the project repository" width="960" height="540" loading="lazy" decoding="async">
+            <img class="project-image" data-project-image src="./assets/projects/m5.webp" alt="M5Stack Touch Control Deck, photograph of the real device on a desk" width="960" height="540" loading="lazy" decoding="async">
           </div>
           <div class="project-content"><p class="project-kicker">ESP32-S3 · BLUETOOTH HID</p><h3>M5Stack Touch Control Deck</h3><p>A wireless touchscreen deck for media controls, shortcuts and everyday PC actions. Built with M5Stack CoreS3 SE.</p>
             <div class="project-links"><a class="project-visit" href="https://m5stack-touch-control-deck.lepczynski.it/" target="_blank" rel="noopener noreferrer">Explore project <span aria-hidden="true">↗</span></a><a class="project-source" href="https://github.com/lepczynski-cloud/M5Stack-Touch-Control-Deck" target="_blank" rel="noopener noreferrer">GitHub source <span aria-hidden="true">↗</span></a></div>
           </div>
         </article>
         <article class="project-card project-scratch">
-          <div class="project-art" role="group" aria-label="SB to HTML Converter application screenshot from its project repository">
+          <div class="project-art" role="group" aria-label="SB to HTML Converter, actual browser application interface">
             <div class="project-art-fallback" aria-hidden="true"><span>SCRATCH TO HTML</span><small>OPEN SOURCE PROJECT</small></div>
-            <img class="project-image" data-project-image src="./assets/projects/scratch.webp" alt="SB to HTML Converter application screenshot from its project repository" width="960" height="540" loading="lazy" decoding="async">
+            <img class="project-image" data-project-image src="./assets/projects/scratch.webp" alt="SB to HTML Converter, actual browser application interface" width="960" height="540" loading="lazy" decoding="async">
           </div>
           <div class="project-content"><p class="project-kicker">BROWSER TOOL · SCRATCH</p><h3>SB to HTML Converter</h3><p>Convert exported Scratch projects into standalone HTML files, directly in your browser or offline.</p>
             <div class="project-links"><a class="project-visit" href="https://sbtohtml.lepczynski.it/" target="_blank" rel="noopener noreferrer">Try converter <span aria-hidden="true">↗</span></a><a class="project-source" href="https://github.com/lepczynski-cloud/sb-to-html-converter" target="_blank" rel="noopener noreferrer">GitHub source <span aria-hidden="true">↗</span></a></div>
           </div>
         </article>
         <article class="project-card project-ascii">
-          <div class="project-art" role="group" aria-label="ASCII Camera Studio output from its project repository">
+          <div class="project-art" role="group" aria-label="ASCII Camera Studio, preview showing a real input image beside the generated ASCII output">
             <div class="project-art-fallback" aria-hidden="true"><span>ASCII CAMERA STUDIO</span><small>OPEN SOURCE PROJECT</small></div>
-            <img class="project-image" data-project-image src="./assets/projects/ascii.webp" alt="ASCII Camera Studio output from its project repository" width="960" height="540" loading="lazy" decoding="async">
+            <img class="project-image" data-project-image src="./assets/projects/ascii.webp" alt="ASCII Camera Studio, preview showing a real input image beside the generated ASCII output" width="960" height="540" loading="lazy" decoding="async">
           </div>
           <div class="project-content"><p class="project-kicker">CREATIVE TOOL · LOCAL-FIRST</p><h3>ASCII Camera Studio</h3><p>Turn images, video and camera input into customizable ASCII art without uploading your files.</p>
             <div class="project-links"><a class="project-visit" href="https://asciicamera.lepczynski.it/" target="_blank" rel="noopener noreferrer">Open studio <span aria-hidden="true">↗</span></a><a class="project-source" href="https://github.com/lepczynski-cloud/ascii-camera-studio" target="_blank" rel="noopener noreferrer">GitHub source <span aria-hidden="true">↗</span></a></div>
           </div>
         </article>
         <article class="project-card project-admin">
-          <div class="project-art" role="group" aria-label="Online Admin Toolkit application screenshot from its project repository">
+          <div class="project-art" role="group" aria-label="Online Admin Toolkit, real screenshot showing its tools dashboard">
             <div class="project-art-fallback" aria-hidden="true"><span>ONLINE ADMIN TOOLKIT</span><small>OPEN SOURCE PROJECT</small></div>
-            <img class="project-image" data-project-image src="./assets/projects/admin.webp" alt="Online Admin Toolkit application screenshot from its project repository" width="960" height="540" loading="lazy" decoding="async">
+            <img class="project-image" data-project-image src="./assets/projects/admin.webp" alt="Online Admin Toolkit, real screenshot showing its tools dashboard" width="960" height="540" loading="lazy" decoding="async">
           </div>
           <div class="project-content"><p class="project-kicker">DEVOPS · BROWSER UTILITIES</p><h3>Online Admin Toolkit</h3><p>Quick browser tools for CIDR, cron, chmod, time zones, encoding and everyday admin work.</p>
             <div class="project-links"><a class="project-visit" href="https://admintoolkit.lepczynski.it/" target="_blank" rel="noopener noreferrer">Explore tools <span aria-hidden="true">↗</span></a><a class="project-source" href="https://github.com/lepczynski-cloud/admin-toolkit" target="_blank" rel="noopener noreferrer">GitHub source <span aria-hidden="true">↗</span></a></div>

@@ -68,8 +68,7 @@ body { font-size: 17px; line-height: 1.7; }
 .project-card { overflow: hidden; background: #111e30; border: 1px solid #35546a; border-radius: 22px; box-shadow: 0 14px 36px #02060e4d; transition: transform .2s ease, border-color .2s ease; }
 .project-card:hover { transform: translateY(-4px); border-color: #6599a5; }
 .project-art { position: relative; height: 207px; display: grid; place-items: center; overflow: hidden; isolation: isolate; }
-/* Actual project images are downloaded and optimized during the Cloudflare build.
-   The simple fallback remains legible if a source repo has no suitable image. */
+/* Genuine, optimized project previews are bundled with the site. */
 .project-art{background:linear-gradient(155deg,#142e40,#0a1828)}
 .project-m5 .project-art{background:linear-gradient(135deg,#183c58,#0a182c)}
 .project-scratch .project-art{background:linear-gradient(135deg,#3a264d,#14243c)}
@@ -78,7 +77,7 @@ body { font-size: 17px; line-height: 1.7; }
 .project-art-fallback{display:flex;flex-direction:column;align-items:center;gap:7px;max-width:90%;text-align:center}
 .project-art-fallback span{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.2;color:#e0f8ff}
 .project-art-fallback small{font-size:10px;letter-spacing:.19em;font-weight:800;color:#8fc2d3}
-.project-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;transition:opacity .25s ease}
+.project-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:1;transition:opacity .25s ease}
 .project-image.is-loaded{opacity:1}
 .project-content { padding: 27px 30px 29px; }
 .project-kicker { color:#8ee5dd; font-size:11px; font-weight:850; letter-spacing:.14em; margin-bottom:10px; }
@@ -226,3 +225,22 @@ body::before { content:"";position:fixed;z-index:-1;inset:-28%;pointer-events:no
  .photo-primary figcaption {right:10px;top:10px;bottom:auto;left:auto;}
  .photo-detail {right:4%;}
 }
+
+
+/* Video section: responsive 16:9 embedded demo, no script or tracking required. */
+.hero-video-link{display:inline-flex;align-items:center;gap:10px;margin-top:17px;color:#a3f6e7;font-size:14px;font-weight:750;text-underline-offset:5px}
+.hero-video-link:hover,.video-youtube-link:hover{color:#fff;text-decoration:underline}
+.hero-video-link span{display:inline-grid;place-items:center;width:27px;height:27px;border:1px solid #64c9cc88;border-radius:50%;font-size:11px;padding-left:2px}
+.video-section{padding:46px 0 96px;border-top:1px solid var(--stroke)}
+.video-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:25px;margin-bottom:28px}
+.video-heading>div{max-width:760px}
+.video-heading h2{font-size:clamp(34px,4.25vw,55px);letter-spacing:-.045em;line-height:1.17;margin:11px 0 13px}
+.video-heading p:last-child{color:#c8d9e6;font-size:17px;line-height:1.7;margin:0}
+.video-youtube-link{white-space:nowrap;color:#a3f6e7;font-weight:750;font-size:14px;padding-bottom:7px}
+.video-frame{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border:1px solid #406779;border-radius:20px;background:linear-gradient(130deg,#142b3a,#0c1828);box-shadow:0 18px 56px #0006}
+.video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+@media(max-width:850px){.video-section{padding:38px 0 78px}}
+@media(max-width:560px){.nav nav a[href="#video"]{display:inline-flex}.nav nav a[href="#projects"]{display:none}.hero-video-link{justify-content:center}.video-section{padding:32px 0 60px}.video-heading{align-items:flex-start;flex-direction:column;gap:10px}.video-heading p:last-child{font-size:16px}.video-frame{border-radius:12px}}
+
+/* Keep both the demo and the firmware installer visible on small screens. */
+@media(max-width:560px){.nav nav{gap:10px}.nav nav a[href="#install"]{display:inline-flex}}

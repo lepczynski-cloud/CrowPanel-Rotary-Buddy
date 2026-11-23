@@ -95,7 +95,6 @@ class WebTests(unittest.TestCase):
             self.assertEqual(data[:4], b'RIFF')
             self.assertEqual(data[8:12], b'WEBP')
             self.assertIn(name, html)
-            self.assertIn(name, readme)
         self.assertIn('id="previewMedia"', html)
         self.assertIn('id="previewBuddy"', html)
         hero = html.split('<div class="hero-visual"', 1)[1].split('</section>', 1)[0]
@@ -124,50 +123,44 @@ class WebTests(unittest.TestCase):
         self.assertIn('mood-gallery', html)
         self.assertIn('SWIPE', html.upper())
 
-    def test_real_project_images_and_safe_fallback(self):
-        import importlib.util
-        spec = importlib.util.spec_from_file_location('fetch_project_images', ROOT / 'scripts/fetch_project_images.py')
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules['fetch_project_images'] = mod
-        spec.loader.exec_module(mod)
-        self.assertEqual(len(mod.SOURCES), 4)
-        self.assertEqual(
-            mod.choose_image([
-                {'type': 'blob', 'path': 'images/logo.svg'},
-                {'type': 'blob', 'path': 'images/device-final-photo.jpg'},
-            ], mod.SOURCES[0]), 'images/device-final-photo.jpg')
-        self.assertEqual(
-            mod.choose_image([
-                {'type': 'blob', 'path': 'assets/readme/converter-screenshot.png'},
-            ], mod.SOURCES[1]), 'assets/readme/converter-screenshot.png')
-        self.assertEqual(
-            mod.choose_image([
-                {'type': 'blob', 'path': 'public/assets/demo/sample-ai-color-burst-ascii.png'},
-            ], mod.SOURCES[2]), 'public/assets/demo/sample-ai-color-burst-ascii.png')
-        self.assertIsNone(mod.choose_image([
-            {'type': 'blob', 'path': 'public/assets/icons/icon-512.png'},
-        ], mod.SOURCES[3]))
+    def test_local_project_images_are_bundled(self):
+        # Screenshots and the device photo must be shipped with the source.
+        # Cloudflare builds must not depend on public GitHub image downloads.
         from PIL import Image
-        from io import BytesIO
-        bio = BytesIO()
-        Image.new('RGB', (1300, 650), '#18405a').save(bio, format='PNG')
-        with tempfile.TemporaryDirectory() as dirname:
-            output = Path(dirname) / 'm5.webp'
-            size = mod.convert_to_webp(bio.getvalue(), output)
-            self.assertTrue(output.read_bytes().startswith(b'RIFF'))
-            self.assertEqual(size, (1200, 600))
         html = (ROOT / 'web/index.html').read_text(encoding='utf-8')
-        self.assertEqual(html.count('data-project-image'), 4)
         for key in ('m5', 'scratch', 'ascii', 'admin'):
+            path = ROOT / 'web/assets/projects' / f'{key}.webp'
+            self.assertTrue(path.is_file(), f'Missing real project image: {key}')
+            self.assertGreater(path.stat().st_size, 8000)
+            with Image.open(path) as image:
+                self.assertEqual(image.format, 'WEBP')
+                self.assertEqual(image.size, (960, 540))
+                image.verify()
             self.assertIn(f'./assets/projects/{key}.webp', html)
         css = (ROOT / 'web/assets/site.css').read_text(encoding='utf-8')
-        js = (ROOT / 'web/assets/site.js').read_text(encoding='utf-8')
-        self.assertIn('.project-image.is-loaded', css)
-        self.assertIn("picture.addEventListener('load'", js)
-        self.assertIn('web/assets/projects/', (ROOT / '.gitignore').read_text())
-        runner = (ROOT / 'scripts/build_pages.sh').read_text()
-        self.assertIn('python scripts/fetch_project_images.py', runner)
-        self.assertGreater(runner.index('python scripts/fetch_project_images.py'), runner.index('python tools/verify_release.py'))
+        self.assertIn('object-position:center;opacity:1', css)
+        self.assertNotIn('web/assets/projects/', (ROOT / '.gitignore').read_text())
+        self.assertNotIn('fetch_project_images.py', (ROOT / 'scripts/build_pages.sh').read_text())
+        self.assertEqual(html.count('data-project-image'), 4)
+
+    def test_readme_photos_square_and_video_links(self):
+        from PIL import Image
+        readme = (ROOT / 'README.md').read_text(encoding='utf-8')
+        html = (ROOT / 'web/index.html').read_text(encoding='utf-8')
+        for name in ('readme-photo-buddy.webp', 'readme-photo-dns.webp'):
+            path = ROOT / 'web/assets' / name
+            self.assertIn(name, readme)
+            with Image.open(path) as image:
+                self.assertEqual(image.size, (680, 680))
+                image.verify()
+        self.assertIn('Watch the Rotary Buddy video', readme)
+        self.assertIn('https://www.youtube.com/watch?v=vjOF7N7Cmbo', readme)
+        self.assertIn('id="video"', html)
+        self.assertIn('href="#video"', html)
+        self.assertIn('https://www.youtube-nocookie.com/embed/vjOF7N7Cmbo', html)
+        self.assertIn('loading="lazy"', html)
+        self.assertIn('allowfullscreen', html)
+        self.assertIn('video-frame', (ROOT / 'web/assets/site.css').read_text())
 
     def test_media_layout_labels_below_icons_and_clean_background(self):
         graphics = (ROOT / 'include/BuddyGraphics.h').read_text(encoding='utf-8')
